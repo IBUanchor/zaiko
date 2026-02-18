@@ -3,45 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材管理シート</title>
+    <title>機材管理</title>
     <style>
-        body { font-family: sans-serif; margin: 0; background-color: #fff; color: #000; }
+        body { font-family: sans-serif; margin: 0; background-color: #fff; }
         
-        /* テーブルのレイアウトを固定 */
         table { 
             border-collapse: collapse; 
             width: 100%; 
-            table-layout: fixed; /* これで列幅を厳密に固定 */
+            table-layout: fixed; /* 列幅を厳密に固定 */
         }
         
-        /* 1行目（ヘッダー） */
+        /* ヘッダー */
         thead th {
             position: sticky; top: 0; z-index: 10;
             background-color: #000; color: #fff;
-            font-size: 13px; 
-            padding: 15px 0;
+            font-size: 13px; padding: 12px 0;
             border: none;
         }
 
-        /* 各列の幅を％で厳密に指定 */
-        .w-name   { width: 35%; } 
-        .w-remain { width: 13%; } 
-        .w-shoot  { width: 10.4%; } 
+        /* 7列の幅を合計100%に固定 */
+        .w-name   { width: 34%; } 
+        .w-remain { width: 11%; } 
+        .w-shoot  { width: 11%; } 
 
         td { 
-            padding: 0; /* 余白をゼロにしてズレを防止 */
+            padding: 0; 
             text-align: center; 
             vertical-align: middle;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #ddd;
         }
 
-        /* 機材名：フォントを小さく、2行目以降の視認性向上 */
+        /* 機材名：2行目以降フォント小 */
         .col-name { 
-            font-size: 14px; /* 1行目より小さく設定 */
+            font-size: 11px; 
             font-weight: bold;
             color: #333;
             text-align: left !important;
-            padding-left: 8px;
+            padding-left: 6px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -49,39 +47,34 @@
 
         /* 残り数量 */
         .col-remain { 
-            font-size: 20px; 
+            font-size: 18px; 
             font-weight: 900; 
             color: #d32f2f;
             background-color: #fffafa;
         }
 
-        /* 入力エリア：縦ラインを意識したデザイン */
+        /* 入力エリア：縦ライン強調・余計な枠なし */
         input[type="number"] {
-            width: 100%; /* セルいっぱいに広げる */
-            height: 55px; /* 高さを出してタップしやすく */
-            font-size: 22px;
+            width: 100%;
+            height: 50px;
+            font-size: 20px;
             font-weight: bold;
             text-align: center;
             border: none;
             background-color: transparent;
-            /* 左右に薄い縦線を入れて、縦の並びを強調 */
-            border-left: 1px solid #f0f0f0;
-            border-right: 1px solid #f0f0f0;
             outline: none;
-            border-radius: 0;
+            display: block;
             -moz-appearance: textfield;
         }
 
-        /* 入力箇所の背景を1列おきに薄く色付け（縦の視認性向上） */
-        td:nth-child(odd) input { background-color: #f9f9f9; }
+        /* 縦のガイドライン：1列おきに薄いグレー */
+        .bg-guide { background-color: #f7f7f7; }
+        
         input:focus { background-color: #e8f0fe !important; }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
             -webkit-appearance: none; margin: 0;
         }
-
-        /* 行の区切りを強調 */
-        tr { border-bottom: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -109,8 +102,8 @@ const masterData = [
     { name: "FE 24-70mm GM II", stock: 8 },
     { name: "FE 70-200mm GM", stock: 4 },
     { name: "Sachtler Flowtech", stock: 12 },
-    { name: "Aputure 600d Pro", stock: 6 },
-    { name: "Sony UWP-D21", stock: 10 }
+    { name: "600d Pro", stock: 6 },
+    { name: "UWP-D21", stock: 10 }
 ];
 
 const tableBody = document.getElementById('tableBody');
@@ -120,11 +113,11 @@ masterData.forEach((item, index) => {
     tr.innerHTML = `
         <td class="col-name">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
+        <td class="bg-guide"><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
         <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
         <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
     `;
     tableBody.appendChild(tr);
 });
@@ -143,8 +136,8 @@ function calculate(rowIndex, stock) {
     remainCell.innerText = currentRemain;
 
     if (currentRemain < 0) {
-        remainCell.style.backgroundColor = "#ffcccc"; 
-        remainCell.style.color = "#ff0000";
+        remainCell.style.backgroundColor = "#ff0000"; 
+        remainCell.style.color = "#ffffff";
     } else {
         remainCell.style.backgroundColor = "#fffafa";
         remainCell.style.color = "#d32f2f";
