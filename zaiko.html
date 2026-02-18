@@ -9,34 +9,37 @@
         
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
         
-        /* ヘッダー */
+        /* 1行目の高さを増やして見やすく */
         thead th {
             position: sticky; top: 0; z-index: 10;
             background-color: #000; color: #fff;
-            font-size: 11px; padding: 5px 0; border: none;
-            vertical-align: top;
+            padding: 10px 0; border: none;
+            height: 120px; /* ヘッダーの高さをしっかり確保 */
+            vertical-align: middle;
         }
 
-        /* 縦書きのスタイル */
-        .v-text {
-            writing-mode: vertical-rl; /* 縦書き指定 */
-            text-orientation: upright; /* 文字を正立させる */
-            margin: 0 auto;
-            letter-spacing: 2px;
-            font-weight: normal;
+        /* 確実に縦並びにするためのボックス */
+        .v-text-box {
+            display: inline-block;
+            font-size: 14px;
+            line-height: 1.2;
+            font-weight: bold;
+            text-align: center;
+            width: 1em; /* 1文字分の幅に強制 */
+            word-wrap: break-word; /* はみ出したら改行 */
         }
 
-        /* リセットボタンを少し調整 */
         .reset-btn {
             display: block;
-            margin: 5px auto 2px;
-            padding: 2px 0;
+            margin: 8px auto 0;
+            padding: 4px 0;
             width: 80%;
-            font-size: 10px;
-            background: #444;
+            font-size: 11px;
+            background: #e74c3c; /* 目立つ赤色に変更 */
             color: #fff;
-            border: 1px solid #666;
-            border-radius: 2px;
+            border: none;
+            border-radius: 3px;
+            font-weight: bold;
         }
 
         /* 列幅固定 */
@@ -46,24 +49,19 @@
 
         td { padding: 0; text-align: center; vertical-align: middle; border-bottom: 1px solid #ddd; }
 
-        /* 機材名 */
         .col-name { 
             font-size: 10px; font-weight: bold; color: #333;
             text-align: left !important; padding-left: 6px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* 残り数量 */
         .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
 
-        /* 入力エリア：中央揃え */
         input[type="number"] {
-            width: 100%; height: 55px;
-            font-size: 20px; font-weight: bold;
-            text-align: center;
-            border: none; background-color: transparent;
-            outline: none; display: block;
-            -moz-appearance: textfield;
+            width: 100%; height: 60px; /* 入力しやすくさらに高く */
+            font-size: 22px; font-weight: bold;
+            text-align: center; border: none; background-color: transparent;
+            outline: none; display: block; -moz-appearance: textfield;
         }
 
         .bg-guide { background-color: #f7f7f7; }
@@ -76,13 +74,13 @@
 <table>
     <thead>
         <tr>
-            <th class="w-name" style="vertical-align:middle;">機材名</th>
-            <th class="w-remain" style="vertical-align:middle;">残</th>
-            <th class="w-shoot"><div class="v-text">撮影１</div><button class="reset-btn" onclick="resetColumn(0)">C</button></th>
-            <th class="w-shoot"><div class="v-text">撮影２</div><button class="reset-btn" onclick="resetColumn(1)">C</button></th>
-            <th class="w-shoot"><div class="v-text">撮影３</div><button class="reset-btn" onclick="resetColumn(2)">C</button></th>
-            <th class="w-shoot"><div class="v-text">撮影４</div><button class="reset-btn" onclick="resetColumn(3)">C</button></th>
-            <th class="w-shoot"><div class="v-text">撮影５</div><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
+            <th class="w-name">機材名</th>
+            <th class="w-remain">残</th>
+            <th class="w-shoot"><span class="v-text-box">撮影１</span><button class="reset-btn" onclick="resetColumn(0)">C</button></th>
+            <th class="w-shoot"><span class="v-text-box">撮影２</span><button class="reset-btn" onclick="resetColumn(1)">C</button></th>
+            <th class="w-shoot"><span class="v-text-box">撮影３</span><button class="reset-btn" onclick="resetColumn(2)">C</button></th>
+            <th class="w-shoot"><span class="v-text-box">撮影４</span><button class="reset-btn" onclick="resetColumn(3)">C</button></th>
+            <th class="w-shoot"><span class="v-text-box">撮影５</span><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
         </tr>
     </thead>
     <tbody id="tableBody">
