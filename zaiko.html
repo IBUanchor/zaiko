@@ -13,22 +13,31 @@
         thead th {
             position: sticky; top: 0; z-index: 10;
             background-color: #000; color: #fff;
-            font-size: 12px; padding: 8px 0; border: none;
+            font-size: 11px; padding: 5px 0; border: none;
+            vertical-align: top;
         }
 
-        /* リセットボタンのスタイル */
+        /* 縦書きのスタイル */
+        .v-text {
+            writing-mode: vertical-rl; /* 縦書き指定 */
+            text-orientation: upright; /* 文字を正立させる */
+            margin: 0 auto;
+            letter-spacing: 2px;
+            font-weight: normal;
+        }
+
+        /* リセットボタンを少し調整 */
         .reset-btn {
             display: block;
-            margin: 4px auto 0;
-            padding: 2px 4px;
+            margin: 5px auto 2px;
+            padding: 2px 0;
+            width: 80%;
             font-size: 10px;
             background: #444;
             color: #fff;
             border: 1px solid #666;
-            border-radius: 3px;
-            cursor: pointer;
+            border-radius: 2px;
         }
-        .reset-btn:active { background: #666; }
 
         /* 列幅固定 */
         .w-name   { width: 34%; } 
@@ -39,7 +48,7 @@
 
         /* 機材名 */
         .col-name { 
-            font-size: 13px; font-weight: bold; color: #333;
+            font-size: 10px; font-weight: bold; color: #333;
             text-align: left !important; padding-left: 6px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
@@ -49,9 +58,9 @@
 
         /* 入力エリア：中央揃え */
         input[type="number"] {
-            width: 100%; height: 50px;
+            width: 100%; height: 55px;
             font-size: 20px; font-weight: bold;
-            text-align: center; /* 中央揃え */
+            text-align: center;
             border: none; background-color: transparent;
             outline: none; display: block;
             -moz-appearance: textfield;
@@ -67,13 +76,13 @@
 <table>
     <thead>
         <tr>
-            <th class="w-name">機材名</th>
-            <th class="w-remain">残</th>
-            <th class="w-shoot">①<button class="reset-btn" onclick="resetColumn(0)">消</button></th>
-            <th class="w-shoot">②<button class="reset-btn" onclick="resetColumn(1)">消</button></th>
-            <th class="w-shoot">③<button class="reset-btn" onclick="resetColumn(2)">消</button></th>
-            <th class="w-shoot">④<button class="reset-btn" onclick="resetColumn(3)">消</button></th>
-            <th class="w-shoot">⑤<button class="reset-btn" onclick="resetColumn(4)">消</button></th>
+            <th class="w-name" style="vertical-align:middle;">機材名</th>
+            <th class="w-remain" style="vertical-align:middle;">残</th>
+            <th class="w-shoot"><div class="v-text">撮影１</div><button class="reset-btn" onclick="resetColumn(0)">C</button></th>
+            <th class="w-shoot"><div class="v-text">撮影２</div><button class="reset-btn" onclick="resetColumn(1)">C</button></th>
+            <th class="w-shoot"><div class="v-text">撮影３</div><button class="reset-btn" onclick="resetColumn(2)">C</button></th>
+            <th class="w-shoot"><div class="v-text">撮影４</div><button class="reset-btn" onclick="resetColumn(3)">C</button></th>
+            <th class="w-shoot"><div class="v-text">撮影５</div><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
         </tr>
     </thead>
     <tbody id="tableBody">
@@ -93,10 +102,9 @@ const masterData = [
 
 const tableBody = document.getElementById('tableBody');
 
-// 初期表示
 masterData.forEach((item, index) => {
     const tr = document.createElement('tr');
-    tr.dataset.stock = item.stock; // 計算用に在庫を保持
+    tr.dataset.stock = item.stock;
     tr.innerHTML = `
         <td class="col-name">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
@@ -109,7 +117,6 @@ masterData.forEach((item, index) => {
     tableBody.appendChild(tr);
 });
 
-// 行ごとの計算
 function calculateRow(rowIndex) {
     const row = document.querySelectorAll('#tableBody tr')[rowIndex];
     const inputs = row.querySelectorAll('input[type="number"]');
@@ -133,10 +140,8 @@ function calculateRow(rowIndex) {
     }
 }
 
-// 特定の列をすべて0にする
 function resetColumn(colIndex) {
-    if(!confirm(`撮影${colIndex + 1}の入力をすべて消去しますか？`)) return;
-    
+    if(!confirm(`撮影${colIndex + 1}をリセットしますか？`)) return;
     const inputs = document.querySelectorAll(`.shoot-${colIndex}`);
     inputs.forEach((input, rowIndex) => {
         input.value = 0;
