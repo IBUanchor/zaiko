@@ -2,56 +2,55 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>機材管理</title>
     <style>
-        /* 画面全体のスクロールとふらつきを禁止 */
-        html, body { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: hidden; /* 本体はスクロールさせない */
-            position: fixed; /* 全体を画面に固定 */
+        /* 全体をゴシック体で統一 */
+        * {
+            box-sizing: border-box;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
         }
 
-        /* テーブル専用のスクロールコンテナ */
-        .scroll-container {
+        html, body {
+            margin: 0;
+            padding: 0;
             width: 100%;
-            height: 100vh;
-            overflow-y: auto; /* 縦スクロールのみ許可 */
-            overflow-x: hidden; /* 横揺れを完全防止 */
-            -webkit-overflow-scrolling: touch;
+            height: 100%;
+            /* 左右のふらつき（横スクロール）を禁止 */
+            overflow-x: hidden; 
+            background-color: #fff;
         }
-        
-        table { 
-            border-collapse: collapse; 
-            width: 100%; 
-            table-layout: fixed;
+
+        /* テーブル構造 */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed; /* 列幅を固定 */
         }
-        
-        /* ヘッダー固定：z-indexを最強にして入力時も残す */
+
+        /* ヘッダー固定：入力時も消えないよう設定 */
         thead th {
-            position: sticky; 
-            top: 0; 
+            position: sticky;
+            top: 0;
             z-index: 100;
-            background-color: #000; 
+            background-color: #000;
             color: #fff;
-            padding: 10px 0; 
             height: 120px;
+            padding: 0;
             vertical-align: middle;
             border: none;
         }
 
+        /* 縦書きテキスト */
         .v-text-box {
             display: inline-block;
             font-size: 14px;
-            line-height: 1.2;
+            line-height: 1.1;
             width: 1em;
-            word-wrap: break-word;
             font-weight: bold;
         }
 
+        /* リセットボタン */
         .reset-btn {
             display: block;
             margin: 8px auto 0;
@@ -62,61 +61,89 @@
             color: #fff;
             border: none;
             border-radius: 4px;
+            font-weight: bold;
         }
 
-        /* 列幅を％で厳密に固定（合計100%） */
-        .w-name   { width: 34%; } 
-        .w-remain { width: 12%; } 
-        .w-shoot  { width: 10.8%; } 
+        /* 列幅：合計100% */
+        .w-name   { width: 34%; }
+        .w-remain { width: 12%; }
+        .w-shoot  { width: 10.8%; }
 
-        td { padding: 0; text-align: center; vertical-align: middle; border-bottom: 1px solid #ddd; }
-
-        .col-name { 
-            font-size: 10px; font-weight: bold; color: #333;
-            text-align: left !important; padding-left: 6px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        td {
+            padding: 0;
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 1px solid #ddd;
         }
 
-        .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
+        /* 機材名：ゴシック体・フォント小 */
+        .col-name {
+            font-size: 10px;
+            font-weight: bold;
+            color: #333;
+            text-align: left !important;
+            padding-left: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 残り数量 */
+        .col-remain {
+            font-size: 18px;
+            font-weight: 900;
+            color: #d32f2f;
+            background-color: #fffafa;
+        }
 
         /* 入力エリア */
         input[type="number"] {
-            width: 100%; height: 60px;
-            font-size: 22px; font-weight: bold;
-            text-align: center; border: none; background-color: transparent;
-            outline: none; display: block;
+            width: 100%;
+            height: 60px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            border: none;
+            background-color: transparent;
+            outline: none;
+            display: block;
             border-radius: 0;
             -webkit-appearance: none;
+            color: #000;
         }
 
+        /* 視認性のためのガイド背景 */
         .bg-guide { background-color: #f7f7f7; }
-        /* フォーカス時に背景を変えるが、画面位置は維持 */
         input:focus { background-color: #e8f0fe !important; }
+
+        input::-webkit-outer-spin-button, 
+        input::-webkit-inner-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
     </style>
 </head>
 <body>
 
-<div class="scroll-container">
-    <table>
-        <thead>
-            <tr>
-                <th class="w-name">機材名</th>
-                <th class="w-remain">残</th>
-                <th class="w-shoot"><span class="v-text-box">撮影１</span><button class="reset-btn" onclick="resetColumn(0)">消</button></th>
-                <th class="w-shoot"><span class="v-text-box">撮影２</span><button class="reset-btn" onclick="resetColumn(1)">消</button></th>
-                <th class="w-shoot"><span class="v-text-box">撮影３</span><button class="reset-btn" onclick="resetColumn(2)">消</button></th>
-                <th class="w-shoot"><span class="v-text-box">撮影４</span><button class="reset-btn" onclick="resetColumn(3)">消</button></th>
-                <th class="w-shoot"><span class="v-text-box">撮影５</span><button class="reset-btn" onclick="resetColumn(4)">消</button></th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            </tbody>
-    </table>
-</div>
+<table>
+    <thead>
+        <tr>
+            <th class="w-name">機材名</th>
+            <th class="w-remain">残</th>
+            <th class="w-shoot"><span class="v-text-box">撮影１</span><button class="reset-btn" onclick="resetColumn(0)">C</button></th>
+            <th class="w-shoot"><span class="v-text-box">撮影２</span><button class="reset-btn" onclick="resetColumn(1)">C</button></th>
+            <th class="w-shoot"><span class="v-text-box">撮影３</span><button class="reset-btn" onclick="resetColumn(2)">C</button></th>
+            <th class="w-shoot"><span class="v-text-box">撮影４</span><button class="reset-btn" onclick="resetColumn(3)">C</button></th>
+            <th class="w-shoot"><span class="v-text-box">撮影５</span><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        </tbody>
+</table>
 
 <script>
+// サンプルデータ（行数を増やしてスクロールを確認できるようにしています）
 const masterData = [
-    { name: "HMI", stock: 0 },
     { name: "Sony α7IV", stock: 10 },
     { name: "Sony α7sIII", stock: 5 },
     { name: "FE 24-70mm GM II", stock: 8 },
@@ -126,7 +153,9 @@ const masterData = [
     { name: "UWP-D21", stock: 10 },
     { name: "追加機材 A", stock: 5 },
     { name: "追加機材 B", stock: 3 },
-    { name: "追加機材 C", stock: 8 }
+    { name: "追加機材 C", stock: 8 },
+    { name: "追加機材 D", stock: 10 },
+    { name: "追加機材 E", stock: 2 }
 ];
 
 const tableBody = document.getElementById('tableBody');
