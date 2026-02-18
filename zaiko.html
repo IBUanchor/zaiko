@@ -3,61 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材入力</title>
+    <title>機材管理シート</title>
     <style>
         body { font-family: sans-serif; margin: 0; background-color: #fff; color: #000; }
         
-        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        /* テーブルのレイアウトを固定 */
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            table-layout: fixed; /* これで列幅を厳密に固定 */
+        }
         
-        /* ヘッダー固定 */
+        /* 1行目（ヘッダー） */
         thead th {
             position: sticky; top: 0; z-index: 10;
             background-color: #000; color: #fff;
-            font-size: 14px; padding: 12px 2px;
+            font-size: 13px; 
+            padding: 15px 0;
             border: none;
         }
 
-        td { border-bottom: 1px solid #eee; padding: 8px 2px; text-align: center; vertical-align: middle; }
+        /* 各列の幅を％で厳密に指定 */
+        .w-name   { width: 35%; } 
+        .w-remain { width: 13%; } 
+        .w-shoot  { width: 10.4%; } 
 
-        /* 機材名：太字・黒 */
-        .col-name { 
-            color: #000; font-weight: bold; font-size: 17px; 
-            text-align: left !important; padding-left: 10px;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        td { 
+            padding: 0; /* 余白をゼロにしてズレを防止 */
+            text-align: center; 
+            vertical-align: middle;
+            border-bottom: 1px solid #eee;
         }
 
-        /* 残り数量：強調 */
-        .col-remain { font-size: 22px; font-weight: 900; color: #d32f2f; }
+        /* 機材名：フォントを小さく、2行目以降の視認性向上 */
+        .col-name { 
+            font-size: 14px; /* 1行目より小さく設定 */
+            font-weight: bold;
+            color: #333;
+            text-align: left !important;
+            padding-left: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-        /* 入力エリア：枠線なし、背景色で区別 */
+        /* 残り数量 */
+        .col-remain { 
+            font-size: 20px; 
+            font-weight: 900; 
+            color: #d32f2f;
+            background-color: #fffafa;
+        }
+
+        /* 入力エリア：縦ラインを意識したデザイン */
         input[type="number"] {
-            width: 90%;
-            height: 45px;
+            width: 100%; /* セルいっぱいに広げる */
+            height: 55px; /* 高さを出してタップしやすく */
             font-size: 22px;
             font-weight: bold;
             text-align: center;
-            border: none;      /* 四角い枠を消去 */
-            background-color: #f0f0f0; /* 薄いグレーで入力箇所を表現 */
+            border: none;
+            background-color: transparent;
+            /* 左右に薄い縦線を入れて、縦の並びを強調 */
+            border-left: 1px solid #f0f0f0;
+            border-right: 1px solid #f0f0f0;
+            outline: none;
             border-radius: 0;
-            outline: none;     /* タップ時の青枠も消去 */
             -moz-appearance: textfield;
         }
-        
-        /* 入力中だけ少し色を濃くする（どこを触っているか分かるように） */
-        input[type="number"]:focus {
-            background-color: #e0e0e0;
-        }
+
+        /* 入力箇所の背景を1列おきに薄く色付け（縦の視認性向上） */
+        td:nth-child(odd) input { background-color: #f9f9f9; }
+        input:focus { background-color: #e8f0fe !important; }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
             -webkit-appearance: none; margin: 0;
         }
 
-        /* 列の幅調整 */
-        .w-name   { width: 38%; } 
-        .w-remain { width: 14%; } 
-        .w-shoot  { width: 9.6%; } 
-
-        /* 行の区切り */
+        /* 行の区切りを強調 */
         tr { border-bottom: 1px solid #ddd; }
     </style>
 </head>
@@ -83,11 +106,11 @@
 const masterData = [
     { name: "Sony α7IV", stock: 10 },
     { name: "Sony α7sIII", stock: 5 },
-    { name: "24-70mm GM", stock: 8 },
-    { name: "70-200mm GM", stock: 4 },
-    { name: "Sachtler 三脚", stock: 12 },
-    { name: "600d Pro", stock: 6 },
-    { name: "UWP-D21", stock: 10 }
+    { name: "FE 24-70mm GM II", stock: 8 },
+    { name: "FE 70-200mm GM", stock: 4 },
+    { name: "Sachtler Flowtech", stock: 12 },
+    { name: "Aputure 600d Pro", stock: 6 },
+    { name: "Sony UWP-D21", stock: 10 }
 ];
 
 const tableBody = document.getElementById('tableBody');
@@ -120,10 +143,10 @@ function calculate(rowIndex, stock) {
     remainCell.innerText = currentRemain;
 
     if (currentRemain < 0) {
-        remainCell.parentElement.style.backgroundColor = "#ffcccc"; 
+        remainCell.style.backgroundColor = "#ffcccc"; 
         remainCell.style.color = "#ff0000";
     } else {
-        remainCell.parentElement.style.backgroundColor = "";
+        remainCell.style.backgroundColor = "#fffafa";
         remainCell.style.color = "#d32f2f";
     }
 }
