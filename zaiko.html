@@ -144,19 +144,79 @@
 <script>
 // サンプルデータ（行数を増やしてスクロールを確認できるようにしています）
 const masterData = [
-    { name: "Sony α7IV", stock: 10 },
-    { name: "Sony α7sIII", stock: 5 },
-    { name: "FE 24-70mm GM II", stock: 8 },
-    { name: "FE 70-200mm GM", stock: 4 },
-    { name: "Sachtler Flowtech", stock: 12 },
-    { name: "600d Pro", stock: 6 },
-    { name: "UWP-D21", stock: 10 },
-    { name: "追加機材 A", stock: 5 },
-    { name: "追加機材 B", stock: 3 },
-    { name: "追加機材 C", stock: 8 },
-    { name: "追加機材 D", stock: 10 },
-    { name: "追加機材 E", stock: 2 }
+    { name: "9kw MAX", stock: 2 },
+    { name: "4kw MAX", stock: 2 },
+    { name: "4kw CP", stock: 2 },
+    { name: "2.5kw CP", stock: 3 },
+    { name: "1.8kw MAX", stock: 4 },
+    { name: "1.2kw MAX", stock: 4 },
+    { name: "1.2kw CP", stock: 2 },
+    { name: "800w MAX", stock: 4 },
+    { name: "200w PAR", stock: 2 },
+    { name: "200w CP", stock: 0 },
+    { name: "Skypanel S360C", stock: 2 },
+    { name: "Skypanel S60C", stock: 2 },
+    { name: "Skypanel S30C", stock: 2 },
+    { name: "Skypanel S120C", stock: 2 },
+    { name: "ジョーズクランプ", stock: 27 },
+    { name: "ミニジョー", stock: 8 },
+    { name: "ロングジョー", stock: 12 },
+    { name: "センタージョー", stock: 8 },
+    { name: "グリップヘッド", stock: 33 },
+    { name: "ホームコア大", stock: 9 },
+    { name: "ホームコア小", stock: 4 },
+    { name: "エレンクリップ", stock: 10 },
+    { name: "シングルクランプ", stock: 21 },
+    { name: "U字フック", stock: 2 },
+    { name: "セーフティワイヤー", stock: 30 },
+    { name: "ビッグベン", stock: 6 },
+    { name: "28φ→17φ 変換", stock: 6 },
+    { name: "チューブトップ", stock: 4 },
+    { name: "1k ハンガー", stock: 6 },
+    { name: "M ハンガー", stock: 9 },
+    { name: "バタフライ(白)", stock: 8 },
+    { name: "バタフライ(黒)", stock: 8 },
+    { name: "オフセットアーム", stock: 2 },
+    { name: "フラッグクランプ", stock: 4 },
+    { name: "S字フック", stock: 20 },
+    { name: "Fクランプ(大)", stock: 28 },
+    { name: "Fクランプ(小)", stock: 4 },
+    { name: "3×6 カポック", stock: 9 },
+    { name: "4×8 カポック", stock: 5 },
+    { name: "クォーカー", stock: 6 },
+    { name: "チューブクランプ", stock: 8 },
+    { name: "スピードグリップ", stock: 10 },
+    { name: "ストラセーバ", stock: 2 },
+    { name: "Aクランク", stock: 2 },
+    { name: "マンボコンボ", stock: 2 },
+    { name: "マンボキャスター", stock: 6 },
+    { name: "ハイコンボ", stock: 8 },
+    { name: "コンボスタンド", stock: 8 },
+    { name: "ローコンボ", stock: 6 },
+    { name: "ベビーコンボ", stock: 4 },
+    { name: "アルミ ハイ", stock: 6 },
+    { name: "アルミ コモン", stock: 6 },
+    { name: "アルミ ロー", stock: 6 },
+    { name: "スタンドベース", stock: 10 },
+    { name: "エアーキャスター", stock: 4 },
+    { name: "1k スタンド", stock: 8 },
+    { name: "マンフロット", stock: 8 },
+    { name: "アルミランウェイ", stock: 4 },
+    { name: "ウッドスタンド", stock: 21 },
+    { name: "アルミウッド", stock: 1 },
+    { name: "ランウェイ", stock: 5 },
+    { name: "5k ロースタンド", stock: 2 },
+    { name: "ウォールプレート", stock: 9 },
+    { name: "40インチセンチュリー", stock: 29 },
+    { name: "20インチセンチュリー", stock: 29 },
+    { name: "コンボバズーカ", stock: 2 },
+    { name: "スタンドカバー", stock: 2 },
+    { name: "センチュリー(大)", stock: 1 },
+    { name: "センチュリー(小)", stock: 1 }
 ];
+    
+    
+  
 
 const tableBody = document.getElementById('tableBody');
 
@@ -210,4 +270,5 @@ function resetColumn(colIndex) {
 
 </body>
 </html>
+
 
