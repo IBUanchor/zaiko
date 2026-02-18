@@ -2,85 +2,112 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>機材在庫管理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>機材管理</title>
     <style>
-        /* 全体の余白を最小化 */
-        body { font-family: sans-serif; margin: 5px; background-color: #eee; }
+        /* 全体の余白をゼロに */
+        body { font-family: sans-serif; margin: 0; background-color: #fff; color: #000; }
         
-        .table-container { 
-            overflow-x: auto; 
-            border: 2px solid #333; 
-            max-height: 90vh;
+        /* テーブルの設定：スマホ幅に合わせる */
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            table-layout: fixed; /* 幅を固定してはみ出し防止 */
         }
         
-        table { border-collapse: collapse; width: 100%; background: white; white-space: nowrap; }
-        
-        /* ヘッダー：文字を大きく、背景を濃く */
-        th {
-            position: sticky; top: 0; z-index: 20;
-            background-color: #000; color: white;
-            padding: 10px 5px; font-size: 18px; border: 1px solid #444;
+        /* 1行目（ヘッダー）の固定 */
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #000;
+            color: #fff;
+            font-size: 14px;
+            padding: 8px 2px;
+            border: 1px solid #333;
         }
 
-        /* 1〜3列目の固定（文字を黒・太字・大きく） */
-        .sticky-col { position: sticky; z-index: 10; background-color: #fff; }
-        .col-type { left: 0; min-width: 80px; color: #000; font-weight: bold; font-size: 18px; }
-        .col-name { left: 80px; min-width: 140px; color: #000; font-weight: bold; font-size: 18px; text-align: left !important; }
-        .col-remain { left: 220px; min-width: 60px; font-size: 22px; font-weight: 900; color: #d32f2f; background-color: #fff0f0; }
+        /* セルの基本設定 */
+        td { 
+            border: 1px solid #ccc; 
+            padding: 4px 2px; 
+            text-align: center; 
+            vertical-align: middle;
+        }
 
-        td { border: 1px solid #999; padding: 4px; text-align: center; }
+        /* 種類・機材名：黒文字・太字・大きく */
+        .col-type, .col-name { 
+            color: #000; 
+            font-weight: bold; 
+            font-size: 16px; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
-        /* 入力エリアを大きく、余白を詰める */
+        /* 残り数量：さらに大きく強調 */
+        .col-remain { 
+            font-size: 20px; 
+            font-weight: 900; 
+            color: #d32f2f; 
+        }
+
+        /* 入力エリア：スマホでタップしやすく巨大化 */
         input[type="number"] {
-            width: 70px;
-            height: 45px; /* タップしやすい高さ */
-            padding: 0;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-            text-align: center;
-            font-size: 24px; /* 入力文字を大きく */
+            width: 90%;
+            height: 40px;
+            font-size: 20px;
             font-weight: bold;
+            text-align: center;
+            border: 1px solid #999;
+            border-radius: 3px;
+            -moz-appearance: textfield; /* スピンボタン非表示 */
+        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+            -webkit-appearance: none; margin: 0;
         }
 
-        /* 在庫数（右端） */
-        .col-stock { background-color: #f0f0f0; color: #333; font-size: 18px; font-weight: bold; }
+        /* 在庫数：控えめ */
+        .col-stock { font-size: 14px; color: #666; background-color: #f9f9f9; }
 
-        /* 行の区切りをはっきりさせる */
-        tr { border-bottom: 2px solid #666; }
+        /* 列の幅指定（合計100%になるよう調整） */
+        .w-type   { width: 15%; } /* 種類 */
+        .w-name   { width: 25%; } /* 機材名 */
+        .w-remain { width: 12%; } /* 残 */
+        .w-shoot  { width: 8.5%; } /* 撮影1〜5 */
+        .w-stock  { width: 7%; }  /* 在庫 */
     </style>
 </head>
 <body>
 
-<div class="table-container">
-    <table id="equipmentTable">
-        <thead>
-            <tr>
-                <th class="sticky-col col-type">種類</th>
-                <th class="sticky-col col-name">機材名</th>
-                <th class="sticky-col col-remain">残</th>
-                <th>撮影1</th>
-                <th>撮影2</th>
-                <th>撮影3</th>
-                <th>撮影4</th>
-                <th>撮影5</th>
-                <th>在庫</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            </tbody>
-    </table>
-</div>
+<table>
+    <thead>
+        <tr>
+            <th class="w-type">種類</th>
+            <th class="w-name">機材</th>
+            <th class="w-remain">残</th>
+            <th class="w-shoot">①</th>
+            <th class="w-shoot">②</th>
+            <th class="w-shoot">③</th>
+            <th class="w-shoot">④</th>
+            <th class="w-shoot">⑤</th>
+            <th class="w-stock">在</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        </tbody>
+</table>
 
 <script>
-// 別データ
+// データ
 const masterData = [
-    { type: "カメラ", name: "α7IV #1", stock: 1 },
-    { type: "カメラ", name: "α7sIII #2", stock: 1 },
-    { type: "レンズ", name: "24-70 GM", stock: 2 },
-    { type: "レンズ", name: "70-200 GM", stock: 2 },
-    { type: "三脚", name: "Sachtler", stock: 5 },
-    { type: "照明", name: "600d Pro", stock: 3 }
+    { type: "CAM", name: "α7IV-1", stock: 1 },
+    { type: "CAM", name: "α7sIII-2", stock: 1 },
+    { type: "LNZ", name: "24-70G", stock: 3 },
+    { type: "LNZ", name: "70-200", stock: 2 },
+    { type: "TRI", name: "Sachtler", stock: 4 },
+    { type: "LIT", name: "600d", stock: 2 },
+    { type: "AUD", name: "UWP-D", stock: 5 }
 ];
 
 const tableBody = document.getElementById('tableBody');
@@ -88,9 +115,9 @@ const tableBody = document.getElementById('tableBody');
 masterData.forEach((item, index) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-        <td class="sticky-col col-type">${item.type}</td>
-        <td class="sticky-col col-name">${item.name}</td>
-        <td class="sticky-col col-remain" id="remain-${index}">${item.stock}</td>
+        <td class="col-type">${item.type}</td>
+        <td class="col-name">${item.name}</td>
+        <td class="col-remain" id="remain-${index}">${item.stock}</td>
         <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
         <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
         <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
@@ -119,7 +146,7 @@ function calculate(rowIndex) {
         remainCell.style.backgroundColor = "#ff0000";
         remainCell.style.color = "#ffffff";
     } else {
-        remainCell.style.backgroundColor = "#fff0f0";
+        remainCell.style.backgroundColor = "transparent";
         remainCell.style.color = "#d32f2f";
     }
 }
