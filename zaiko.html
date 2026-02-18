@@ -7,53 +7,58 @@
     <style>
         body { font-family: sans-serif; margin: 0; background-color: #fff; color: #000; }
         
-        table { 
-            border-collapse: collapse; 
-            width: 100%; 
-            table-layout: fixed; 
-        }
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
         
         /* ヘッダー固定 */
         thead th {
             position: sticky; top: 0; z-index: 10;
             background-color: #000; color: #fff;
-            font-size: 16px; padding: 10px 2px;
-            border: 1px solid #333;
+            font-size: 14px; padding: 12px 2px;
+            border: none;
         }
 
-        td { border: 1px solid #ccc; padding: 6px 2px; text-align: center; vertical-align: middle; }
+        td { border-bottom: 1px solid #eee; padding: 8px 2px; text-align: center; vertical-align: middle; }
 
-        /* 機材名：大きく黒く */
+        /* 機材名：太字・黒 */
         .col-name { 
-            color: #000; font-weight: bold; font-size: 18px; 
-            text-align: left !important; padding-left: 8px;
+            color: #000; font-weight: bold; font-size: 17px; 
+            text-align: left !important; padding-left: 10px;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
 
-        /* 残り数量：最大強調 */
-        .col-remain { font-size: 24px; font-weight: 900; color: #d32f2f; }
+        /* 残り数量：強調 */
+        .col-remain { font-size: 22px; font-weight: 900; color: #d32f2f; }
 
-        /* 入力エリア：さらに大きく */
+        /* 入力エリア：枠線なし、背景色で区別 */
         input[type="number"] {
-            width: 95%;
-            height: 48px; /* さらに高くしてタップミス防止 */
-            font-size: 24px;
+            width: 90%;
+            height: 45px;
+            font-size: 22px;
             font-weight: bold;
             text-align: center;
-            border: 2px solid #bbb;
-            border-radius: 4px;
+            border: none;      /* 四角い枠を消去 */
+            background-color: #f0f0f0; /* 薄いグレーで入力箇所を表現 */
+            border-radius: 0;
+            outline: none;     /* タップ時の青枠も消去 */
             -moz-appearance: textfield;
         }
+        
+        /* 入力中だけ少し色を濃くする（どこを触っているか分かるように） */
+        input[type="number"]:focus {
+            background-color: #e0e0e0;
+        }
+
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
             -webkit-appearance: none; margin: 0;
         }
 
-        /* 列の幅調整（合計100%） */
-        .w-name   { width: 35%; } /* 機材名（広く確保） */
-        .w-remain { width: 15%; } /* 残 */
-        .w-shoot  { width: 10%; } /* 撮影1〜5 */
+        /* 列の幅調整 */
+        .w-name   { width: 38%; } 
+        .w-remain { width: 14%; } 
+        .w-shoot  { width: 9.6%; } 
 
-        tr:nth-child(even) { background-color: #f2f2f2; } /* 行を交互に色付け */
+        /* 行の区切り */
+        tr { border-bottom: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -63,11 +68,11 @@
         <tr>
             <th class="w-name">機材名</th>
             <th class="w-remain">残</th>
-            <th class="w-shoot">1</th>
-            <th class="w-shoot">2</th>
-            <th class="w-shoot">3</th>
-            <th class="w-shoot">4</th>
-            <th class="w-shoot">5</th>
+            <th class="w-shoot">①</th>
+            <th class="w-shoot">②</th>
+            <th class="w-shoot">③</th>
+            <th class="w-shoot">④</th>
+            <th class="w-shoot">⑤</th>
         </tr>
     </thead>
     <tbody id="tableBody">
@@ -75,7 +80,6 @@
 </table>
 
 <script>
-// データ（在庫数は計算用に内部で保持）
 const masterData = [
     { name: "Sony α7IV", stock: 10 },
     { name: "Sony α7sIII", stock: 5 },
@@ -116,7 +120,7 @@ function calculate(rowIndex, stock) {
     remainCell.innerText = currentRemain;
 
     if (currentRemain < 0) {
-        remainCell.parentElement.style.backgroundColor = "#ffcccc"; // 行全体を警告色に
+        remainCell.parentElement.style.backgroundColor = "#ffcccc"; 
         remainCell.style.color = "#ff0000";
     } else {
         remainCell.parentElement.style.backgroundColor = "";
@@ -127,4 +131,3 @@ function calculate(rowIndex, stock) {
 
 </body>
 </html>
-
