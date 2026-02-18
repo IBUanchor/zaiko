@@ -7,74 +7,59 @@
     <style>
         body { font-family: sans-serif; margin: 0; background-color: #fff; }
         
-        table { 
-            border-collapse: collapse; 
-            width: 100%; 
-            table-layout: fixed; /* 列幅を厳密に固定 */
-        }
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
         
         /* ヘッダー */
         thead th {
             position: sticky; top: 0; z-index: 10;
             background-color: #000; color: #fff;
-            font-size: 13px; padding: 12px 0;
-            border: none;
+            font-size: 12px; padding: 8px 0; border: none;
         }
 
-        /* 7列の幅を合計100%に固定 */
+        /* リセットボタンのスタイル */
+        .reset-btn {
+            display: block;
+            margin: 4px auto 0;
+            padding: 2px 4px;
+            font-size: 10px;
+            background: #444;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .reset-btn:active { background: #666; }
+
+        /* 列幅固定 */
         .w-name   { width: 34%; } 
         .w-remain { width: 11%; } 
         .w-shoot  { width: 11%; } 
 
-        td { 
-            padding: 0; 
-            text-align: center; 
-            vertical-align: middle;
-            border-bottom: 1px solid #ddd;
-        }
+        td { padding: 0; text-align: center; vertical-align: middle; border-bottom: 1px solid #ddd; }
 
-        /* 機材名：2行目以降フォント小 */
+        /* 機材名 */
         .col-name { 
-            font-size: 11px; 
-            font-weight: bold;
-            color: #333;
-            text-align: left !important;
-            padding-left: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 13px; font-weight: bold; color: #333;
+            text-align: left !important; padding-left: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
         /* 残り数量 */
-        .col-remain { 
-            font-size: 18px; 
-            font-weight: 900; 
-            color: #d32f2f;
-            background-color: #fffafa;
-        }
+        .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
 
-        /* 入力エリア：縦ライン強調・余計な枠なし */
+        /* 入力エリア：中央揃え */
         input[type="number"] {
-            width: 100%;
-            height: 50px;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            border: none;
-            background-color: transparent;
-            outline: none;
-            display: block;
+            width: 100%; height: 50px;
+            font-size: 20px; font-weight: bold;
+            text-align: center; /* 中央揃え */
+            border: none; background-color: transparent;
+            outline: none; display: block;
             -moz-appearance: textfield;
         }
 
-        /* 縦のガイドライン：1列おきに薄いグレー */
         .bg-guide { background-color: #f7f7f7; }
-        
         input:focus { background-color: #e8f0fe !important; }
-
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-            -webkit-appearance: none; margin: 0;
-        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body>
@@ -84,11 +69,11 @@
         <tr>
             <th class="w-name">機材名</th>
             <th class="w-remain">残</th>
-            <th class="w-shoot">①</th>
-            <th class="w-shoot">②</th>
-            <th class="w-shoot">③</th>
-            <th class="w-shoot">④</th>
-            <th class="w-shoot">⑤</th>
+            <th class="w-shoot">①<button class="reset-btn" onclick="resetColumn(0)">消</button></th>
+            <th class="w-shoot">②<button class="reset-btn" onclick="resetColumn(1)">消</button></th>
+            <th class="w-shoot">③<button class="reset-btn" onclick="resetColumn(2)">消</button></th>
+            <th class="w-shoot">④<button class="reset-btn" onclick="resetColumn(3)">消</button></th>
+            <th class="w-shoot">⑤<button class="reset-btn" onclick="resetColumn(4)">消</button></th>
         </tr>
     </thead>
     <tbody id="tableBody">
@@ -108,23 +93,27 @@ const masterData = [
 
 const tableBody = document.getElementById('tableBody');
 
+// 初期表示
 masterData.forEach((item, index) => {
     const tr = document.createElement('tr');
+    tr.dataset.stock = item.stock; // 計算用に在庫を保持
     tr.innerHTML = `
         <td class="col-name">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
-        <td class="bg-guide"><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
-        <td class="bg-guide"><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
-        <td class="bg-guide"><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-0" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td><input type="number" class="shoot-1" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-2" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td><input type="number" class="shoot-3" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-4" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
     `;
     tableBody.appendChild(tr);
 });
 
-function calculate(rowIndex, stock) {
+// 行ごとの計算
+function calculateRow(rowIndex) {
     const row = document.querySelectorAll('#tableBody tr')[rowIndex];
     const inputs = row.querySelectorAll('input[type="number"]');
+    const stock = parseInt(row.dataset.stock);
     const remainCell = document.getElementById(`remain-${rowIndex}`);
 
     let totalUsed = 0;
@@ -142,6 +131,17 @@ function calculate(rowIndex, stock) {
         remainCell.style.backgroundColor = "#fffafa";
         remainCell.style.color = "#d32f2f";
     }
+}
+
+// 特定の列をすべて0にする
+function resetColumn(colIndex) {
+    if(!confirm(`撮影${colIndex + 1}の入力をすべて消去しますか？`)) return;
+    
+    const inputs = document.querySelectorAll(`.shoot-${colIndex}`);
+    inputs.forEach((input, rowIndex) => {
+        input.value = 0;
+        calculateRow(rowIndex);
+    });
 }
 </script>
 
