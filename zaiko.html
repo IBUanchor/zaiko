@@ -3,79 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材管理</title>
+    <title>機材入力</title>
     <style>
-        /* 全体の余白をゼロに */
         body { font-family: sans-serif; margin: 0; background-color: #fff; color: #000; }
         
-        /* テーブルの設定：スマホ幅に合わせる */
         table { 
             border-collapse: collapse; 
             width: 100%; 
-            table-layout: fixed; /* 幅を固定してはみ出し防止 */
+            table-layout: fixed; 
         }
         
-        /* 1行目（ヘッダー）の固定 */
+        /* ヘッダー固定 */
         thead th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: #000;
-            color: #fff;
-            font-size: 14px;
-            padding: 8px 2px;
+            position: sticky; top: 0; z-index: 10;
+            background-color: #000; color: #fff;
+            font-size: 16px; padding: 10px 2px;
             border: 1px solid #333;
         }
 
-        /* セルの基本設定 */
-        td { 
-            border: 1px solid #ccc; 
-            padding: 4px 2px; 
-            text-align: center; 
-            vertical-align: middle;
+        td { border: 1px solid #ccc; padding: 6px 2px; text-align: center; vertical-align: middle; }
+
+        /* 機材名：大きく黒く */
+        .col-name { 
+            color: #000; font-weight: bold; font-size: 18px; 
+            text-align: left !important; padding-left: 8px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
 
-        /* 種類・機材名：黒文字・太字・大きく */
-        .col-type, .col-name { 
-            color: #000; 
-            font-weight: bold; 
-            font-size: 16px; 
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        /* 残り数量：最大強調 */
+        .col-remain { font-size: 24px; font-weight: 900; color: #d32f2f; }
 
-        /* 残り数量：さらに大きく強調 */
-        .col-remain { 
-            font-size: 20px; 
-            font-weight: 900; 
-            color: #d32f2f; 
-        }
-
-        /* 入力エリア：スマホでタップしやすく巨大化 */
+        /* 入力エリア：さらに大きく */
         input[type="number"] {
-            width: 90%;
-            height: 40px;
-            font-size: 20px;
+            width: 95%;
+            height: 48px; /* さらに高くしてタップミス防止 */
+            font-size: 24px;
             font-weight: bold;
             text-align: center;
-            border: 1px solid #999;
-            border-radius: 3px;
-            -moz-appearance: textfield; /* スピンボタン非表示 */
+            border: 2px solid #bbb;
+            border-radius: 4px;
+            -moz-appearance: textfield;
         }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
             -webkit-appearance: none; margin: 0;
         }
 
-        /* 在庫数：控えめ */
-        .col-stock { font-size: 14px; color: #666; background-color: #f9f9f9; }
+        /* 列の幅調整（合計100%） */
+        .w-name   { width: 35%; } /* 機材名（広く確保） */
+        .w-remain { width: 15%; } /* 残 */
+        .w-shoot  { width: 10%; } /* 撮影1〜5 */
 
-        /* 列の幅指定（合計100%になるよう調整） */
-        .w-type   { width: 15%; } /* 種類 */
-        .w-name   { width: 25%; } /* 機材名 */
-        .w-remain { width: 12%; } /* 残 */
-        .w-shoot  { width: 8.5%; } /* 撮影1〜5 */
-        .w-stock  { width: 7%; }  /* 在庫 */
+        tr:nth-child(even) { background-color: #f2f2f2; } /* 行を交互に色付け */
     </style>
 </head>
 <body>
@@ -83,15 +61,13 @@
 <table>
     <thead>
         <tr>
-            <th class="w-type">種類</th>
-            <th class="w-name">機材</th>
+            <th class="w-name">機材名</th>
             <th class="w-remain">残</th>
             <th class="w-shoot">①</th>
             <th class="w-shoot">②</th>
             <th class="w-shoot">③</th>
             <th class="w-shoot">④</th>
             <th class="w-shoot">⑤</th>
-            <th class="w-stock">在</th>
         </tr>
     </thead>
     <tbody id="tableBody">
@@ -99,15 +75,15 @@
 </table>
 
 <script>
-// データ
+// データ（在庫数は計算用に内部で保持）
 const masterData = [
-    { type: "CAM", name: "α7IV-1", stock: 1 },
-    { type: "CAM", name: "α7sIII-2", stock: 1 },
-    { type: "LNZ", name: "24-70G", stock: 3 },
-    { type: "LNZ", name: "70-200", stock: 2 },
-    { type: "TRI", name: "Sachtler", stock: 4 },
-    { type: "LIT", name: "600d", stock: 2 },
-    { type: "AUD", name: "UWP-D", stock: 5 }
+    { name: "Sony α7IV", stock: 10 },
+    { name: "Sony α7sIII", stock: 5 },
+    { name: "24-70mm GM", stock: 8 },
+    { name: "70-200mm GM", stock: 4 },
+    { name: "Sachtler 三脚", stock: 12 },
+    { name: "600d Pro", stock: 6 },
+    { name: "UWP-D21", stock: 10 }
 ];
 
 const tableBody = document.getElementById('tableBody');
@@ -115,23 +91,20 @@ const tableBody = document.getElementById('tableBody');
 masterData.forEach((item, index) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-        <td class="col-type">${item.type}</td>
         <td class="col-name">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
-        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td class="col-stock" id="stock-${index}">${item.stock}</td>
+        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
+        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
+        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
+        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
+        <td><input type="number" value="0" oninput="calculate(${index}, ${item.stock})" onclick="this.select()"></td>
     `;
     tableBody.appendChild(tr);
 });
 
-function calculate(rowIndex) {
+function calculate(rowIndex, stock) {
     const row = document.querySelectorAll('#tableBody tr')[rowIndex];
     const inputs = row.querySelectorAll('input[type="number"]');
-    const stock = parseInt(document.getElementById(`stock-${rowIndex}`).innerText);
     const remainCell = document.getElementById(`remain-${rowIndex}`);
 
     let totalUsed = 0;
@@ -143,10 +116,10 @@ function calculate(rowIndex) {
     remainCell.innerText = currentRemain;
 
     if (currentRemain < 0) {
-        remainCell.style.backgroundColor = "#ff0000";
-        remainCell.style.color = "#ffffff";
+        remainCell.parentElement.style.backgroundColor = "#ffcccc"; // 行全体を警告色に
+        remainCell.style.color = "#ff0000";
     } else {
-        remainCell.style.backgroundColor = "transparent";
+        remainCell.parentElement.style.backgroundColor = "";
         remainCell.style.color = "#d32f2f";
     }
 }
