@@ -2,67 +2,69 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>機材在庫管理シート</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機材在庫管理</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f7f6; }
-        .table-container { overflow-x: auto; max-width: 100%; border: 1px solid #ccc; }
+        /* 全体の余白を最小化 */
+        body { font-family: sans-serif; margin: 5px; background-color: #eee; }
         
-        table { border-collapse: collapse; width: 100%; background: white; min-width: 800px; }
+        .table-container { 
+            overflow-x: auto; 
+            border: 2px solid #333; 
+            max-height: 90vh;
+        }
         
-        /* ヘッダー固定 */
+        table { border-collapse: collapse; width: 100%; background: white; white-space: nowrap; }
+        
+        /* ヘッダー：文字を大きく、背景を濃く */
         th {
-            position: sticky;
-            top: 0;
-            background-color: #2c3e50;
-            color: white;
-            z-index: 10;
-            padding: 12px;
-            white-space: nowrap;
+            position: sticky; top: 0; z-index: 20;
+            background-color: #000; color: white;
+            padding: 10px 5px; font-size: 18px; border: 1px solid #444;
         }
 
-        /* 1〜3列目と最終列（在庫）を横スクロール時に固定 */
-        .sticky-col {
-            position: sticky;
-            z-index: 5;
-            background-color: #f9f9f9;
-        }
-        .col-type { left: 0; }
-        .col-name { left: 80px; } /* 前の列の幅に合わせて調整 */
-        .col-remain { left: 200px; font-weight: bold; color: #e74c3c; }
+        /* 1〜3列目の固定（文字を黒・太字・大きく） */
+        .sticky-col { position: sticky; z-index: 10; background-color: #fff; }
+        .col-type { left: 0; min-width: 80px; color: #000; font-weight: bold; font-size: 18px; }
+        .col-name { left: 80px; min-width: 140px; color: #000; font-weight: bold; font-size: 18px; text-align: left !important; }
+        .col-remain { left: 220px; min-width: 60px; font-size: 22px; font-weight: 900; color: #d32f2f; background-color: #fff0f0; }
 
-        td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        td { border: 1px solid #999; padding: 4px; text-align: center; }
 
-        /* 入力エリアのスタイル */
+        /* 入力エリアを大きく、余白を詰める */
         input[type="number"] {
-            width: 60px;
-            padding: 8px;
-            border: 1px solid #ddd;
+            width: 70px;
+            height: 45px; /* タップしやすい高さ */
+            padding: 0;
+            border: 2px solid #ccc;
             border-radius: 4px;
             text-align: center;
-            font-size: 16px; /* モバイルでズームしないように */
+            font-size: 24px; /* 入力文字を大きく */
+            font-weight: bold;
         }
 
-        tr:hover { background-color: #f1f1f1; }
-        .bg-gray { background-color: #eee; }
+        /* 在庫数（右端） */
+        .col-stock { background-color: #f0f0f0; color: #333; font-size: 18px; font-weight: bold; }
+
+        /* 行の区切りをはっきりさせる */
+        tr { border-bottom: 2px solid #666; }
     </style>
 </head>
 <body>
-
-<h2>機材在庫管理システム</h2>
 
 <div class="table-container">
     <table id="equipmentTable">
         <thead>
             <tr>
-                <th class="sticky-col col-type">機材種類</th>
+                <th class="sticky-col col-type">種類</th>
                 <th class="sticky-col col-name">機材名</th>
-                <th class="sticky-col col-remain">残り数量</th>
+                <th class="sticky-col col-remain">残</th>
                 <th>撮影1</th>
                 <th>撮影2</th>
                 <th>撮影3</th>
                 <th>撮影4</th>
                 <th>撮影5</th>
-                <th>在庫数</th>
+                <th>在庫</th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -71,35 +73,34 @@
 </div>
 
 <script>
-// 別データ（本来はデータベースやAPIから取得する想定）
+// 別データ
 const masterData = [
-    { type: "カメラ", name: "Sony α7IV", stock: 10 },
-    { type: "レンズ", name: "24-70mm GM", stock: 5 },
-    { type: "照明", name: "Aputure 300d", stock: 8 },
-    { type: "三脚", name: "Manfrotto", stock: 12 }
+    { type: "カメラ", name: "α7IV #1", stock: 1 },
+    { type: "カメラ", name: "α7sIII #2", stock: 1 },
+    { type: "レンズ", name: "24-70 GM", stock: 2 },
+    { type: "レンズ", name: "70-200 GM", stock: 2 },
+    { type: "三脚", name: "Sachtler", stock: 5 },
+    { type: "照明", name: "600d Pro", stock: 3 }
 ];
 
 const tableBody = document.getElementById('tableBody');
 
-// テーブル行の生成
 masterData.forEach((item, index) => {
     const tr = document.createElement('tr');
-    
     tr.innerHTML = `
         <td class="sticky-col col-type">${item.type}</td>
         <td class="sticky-col col-name">${item.name}</td>
         <td class="sticky-col col-remain" id="remain-${index}">${item.stock}</td>
-        <td><input type="number" value="0" min="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td><input type="number" value="0" min="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td><input type="number" value="0" min="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td><input type="number" value="0" min="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td><input type="number" value="0" min="0" oninput="calculate(${index})" onclick="this.select()"></td>
-        <td class="bg-gray" id="stock-${index}">${item.stock}</td>
+        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
+        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
+        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
+        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
+        <td><input type="number" value="0" oninput="calculate(${index})" onclick="this.select()"></td>
+        <td class="col-stock" id="stock-${index}">${item.stock}</td>
     `;
     tableBody.appendChild(tr);
 });
 
-// 計算ロジック
 function calculate(rowIndex) {
     const row = document.querySelectorAll('#tableBody tr')[rowIndex];
     const inputs = row.querySelectorAll('input[type="number"]');
@@ -114,8 +115,13 @@ function calculate(rowIndex) {
     const currentRemain = stock - totalUsed;
     remainCell.innerText = currentRemain;
 
-    // 残り数がマイナスになったら色を変える演出
-    remainCell.style.color = currentRemain < 0 ? "red" : "#e74c3c";
+    if (currentRemain < 0) {
+        remainCell.style.backgroundColor = "#ff0000";
+        remainCell.style.color = "#ffffff";
+    } else {
+        remainCell.style.backgroundColor = "#fff0f0";
+        remainCell.style.color = "#d32f2f";
+    }
 }
 </script>
 
