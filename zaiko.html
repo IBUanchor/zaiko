@@ -2,50 +2,72 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>機材管理</title>
     <style>
-        body { font-family: sans-serif; margin: 0; background-color: #fff; }
-        
-        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-        
-        /* 1行目の高さを増やして見やすく */
-        thead th {
-            position: sticky; top: 0; z-index: 10;
-            background-color: #000; color: #fff;
-            padding: 10px 0; border: none;
-            height: 120px; /* ヘッダーの高さをしっかり確保 */
-            vertical-align: middle;
+        /* 画面全体のスクロールとふらつきを禁止 */
+        html, body { 
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; /* 本体はスクロールさせない */
+            position: fixed; /* 全体を画面に固定 */
         }
 
-        /* 確実に縦並びにするためのボックス */
+        /* テーブル専用のスクロールコンテナ */
+        .scroll-container {
+            width: 100%;
+            height: 100vh;
+            overflow-y: auto; /* 縦スクロールのみ許可 */
+            overflow-x: hidden; /* 横揺れを完全防止 */
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            table-layout: fixed;
+        }
+        
+        /* ヘッダー固定：z-indexを最強にして入力時も残す */
+        thead th {
+            position: sticky; 
+            top: 0; 
+            z-index: 100;
+            background-color: #000; 
+            color: #fff;
+            padding: 10px 0; 
+            height: 120px;
+            vertical-align: middle;
+            border: none;
+        }
+
         .v-text-box {
             display: inline-block;
             font-size: 14px;
             line-height: 1.2;
+            width: 1em;
+            word-wrap: break-word;
             font-weight: bold;
-            text-align: center;
-            width: 1em; /* 1文字分の幅に強制 */
-            word-wrap: break-word; /* はみ出したら改行 */
         }
 
         .reset-btn {
             display: block;
             margin: 8px auto 0;
-            padding: 4px 0;
-            width: 80%;
+            padding: 5px 0;
+            width: 85%;
             font-size: 11px;
-            background: #e74c3c; /* 目立つ赤色に変更 */
+            background: #e74c3c;
             color: #fff;
             border: none;
-            border-radius: 3px;
-            font-weight: bold;
+            border-radius: 4px;
         }
 
-        /* 列幅固定 */
+        /* 列幅を％で厳密に固定（合計100%） */
         .w-name   { width: 34%; } 
-        .w-remain { width: 11%; } 
-        .w-shoot  { width: 11%; } 
+        .w-remain { width: 12%; } 
+        .w-shoot  { width: 10.8%; } 
 
         td { padding: 0; text-align: center; vertical-align: middle; border-bottom: 1px solid #ddd; }
 
@@ -57,35 +79,40 @@
 
         .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
 
+        /* 入力エリア */
         input[type="number"] {
-            width: 100%; height: 60px; /* 入力しやすくさらに高く */
+            width: 100%; height: 60px;
             font-size: 22px; font-weight: bold;
             text-align: center; border: none; background-color: transparent;
-            outline: none; display: block; -moz-appearance: textfield;
+            outline: none; display: block;
+            border-radius: 0;
+            -webkit-appearance: none;
         }
 
         .bg-guide { background-color: #f7f7f7; }
+        /* フォーカス時に背景を変えるが、画面位置は維持 */
         input:focus { background-color: #e8f0fe !important; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body>
 
-<table>
-    <thead>
-        <tr>
-            <th class="w-name">機材名</th>
-            <th class="w-remain">残</th>
-            <th class="w-shoot"><span class="v-text-box">撮影１</span><button class="reset-btn" onclick="resetColumn(0)">C</button></th>
-            <th class="w-shoot"><span class="v-text-box">撮影２</span><button class="reset-btn" onclick="resetColumn(1)">C</button></th>
-            <th class="w-shoot"><span class="v-text-box">撮影３</span><button class="reset-btn" onclick="resetColumn(2)">C</button></th>
-            <th class="w-shoot"><span class="v-text-box">撮影４</span><button class="reset-btn" onclick="resetColumn(3)">C</button></th>
-            <th class="w-shoot"><span class="v-text-box">撮影５</span><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
-        </tr>
-    </thead>
-    <tbody id="tableBody">
-        </tbody>
-</table>
+<div class="scroll-container">
+    <table>
+        <thead>
+            <tr>
+                <th class="w-name">機材名</th>
+                <th class="w-remain">残</th>
+                <th class="w-shoot"><span class="v-text-box">撮影１</span><button class="reset-btn" onclick="resetColumn(0)">消</button></th>
+                <th class="w-shoot"><span class="v-text-box">撮影２</span><button class="reset-btn" onclick="resetColumn(1)">消</button></th>
+                <th class="w-shoot"><span class="v-text-box">撮影３</span><button class="reset-btn" onclick="resetColumn(2)">消</button></th>
+                <th class="w-shoot"><span class="v-text-box">撮影４</span><button class="reset-btn" onclick="resetColumn(3)">消</button></th>
+                <th class="w-shoot"><span class="v-text-box">撮影５</span><button class="reset-btn" onclick="resetColumn(4)">消</button></th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+</div>
 
 <script>
 const masterData = [
@@ -96,7 +123,10 @@ const masterData = [
     { name: "FE 70-200mm GM", stock: 4 },
     { name: "Sachtler Flowtech", stock: 12 },
     { name: "600d Pro", stock: 6 },
-    { name: "UWP-D21", stock: 10 }
+    { name: "UWP-D21", stock: 10 },
+    { name: "追加機材 A", stock: 5 },
+    { name: "追加機材 B", stock: 3 },
+    { name: "追加機材 C", stock: 8 }
 ];
 
 const tableBody = document.getElementById('tableBody');
@@ -140,7 +170,7 @@ function calculateRow(rowIndex) {
 }
 
 function resetColumn(colIndex) {
-    if(!confirm(`撮影${colIndex + 1}をリセットしますか？`)) return;
+    if(!confirm(`撮影${colIndex + 1}をリセット？`)) return;
     const inputs = document.querySelectorAll(`.shoot-${colIndex}`);
     inputs.forEach((input, rowIndex) => {
         input.value = 0;
@@ -151,4 +181,3 @@ function resetColumn(colIndex) {
 
 </body>
 </html>
-
