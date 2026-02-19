@@ -561,17 +561,30 @@ function calculateRow(rowIndex) {
 }
 
 function resetColumn(colIndex) {
-    const colName = document.querySelectorAll('.header-input')[colIndex].value;
-    if(!confirm(`撮影${colIndex + 1}をリセット？`)) return;
+    // 現在のヘッダー名を取得
+    const headerInputs = document.querySelectorAll('.header-input');
+    const currentName = headerInputs[colIndex].value;
+    
+    // 確認ダイアログ
+    if(!confirm(`${currentName} の全データと名前をリセットしますか？`)) return;
+    
+    // 1. ヘッダー名を元の「撮影x」に戻す
+    headerInputs[colIndex].value = `撮影${colIndex + 1}`;
+    
+    // 2. その列の数値をすべて0に戻す
     const inputs = document.querySelectorAll(`.shoot-${colIndex}`);
     inputs.forEach((input, rowIndex) => {
         input.value = 0;
+        // 数値が0になったのでグレーにする（is-zeroクラスの適用）
+        input.classList.add('is-zero');
+        // 在庫の再計算を実行
         calculateRow(rowIndex);
     });
 }
 </script>
 </body>
 </html>
+
 
 
 
