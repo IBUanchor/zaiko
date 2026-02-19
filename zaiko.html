@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材員数管理システム (テンキー版)</title>
+    <title>機材員数管理システム (合算テンキー版)</title>
     <style>
         * { box-sizing: border-box; font-family: sans-serif; touch-action: manipulation; }
         html, body { margin: 0; padding: 0; width: 100%; background-color: #fff; overflow-x: hidden; }
@@ -43,7 +43,7 @@
         .w-shoot { width: 10.8%; }
 
         td { padding: 0; text-align: center; border-bottom: 1px solid #ddd; }
-        .col-name { font-size: 12px; font-weight: bold; padding-left: 6px; text-align: left !important; }
+        .col-name { font-size: 12px; font-weight: bold; padding-left: 6px; text-align: left !important; overflow: hidden; }
         .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
 
         /* 入力セル */
@@ -54,25 +54,29 @@
         }
         .is-zero { color: #aaa; }
         .bg-guide { background-color: rgba(0,0,0,0.03); }
-        .active-cell { background-color: #bbdefb !important; color: #000 !important; }
+        .active-cell { background-color: #bbdefb !important; color: #000 !important; border: 2px solid #007bff; }
 
         /* カスタムテンキー */
         #numpad {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: #333; padding: 10px; display: none;
-            grid-template-columns: repeat(4, 1fr); gap: 8px;
-            z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            background: #444; padding: 10px; display: none;
+            grid-template-columns: repeat(5, 1fr); gap: 6px;
+            z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
         }
         .num-btn {
-            background: #eee; border: none; border-radius: 8px;
-            height: 50px; font-size: 20px; font-weight: bold;
+            background: #fff; border: none; border-radius: 6px;
+            height: 55px; font-size: 18px; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 0 #bbb;
         }
-        .num-btn:active { background: #ccc; }
-        .num-close { background: #666; color: #fff; grid-column: span 4; font-size: 14px; height: 35px; }
+        .num-btn:active { background: #ddd; transform: translateY(2px); box-shadow: none; }
+        
+        /* 特殊ボタン色 */
+        .btn-10s { background: #ffd54f; } /* 10の位 */
+        .btn-clear { background: #ff8a65; color: #fff; } /* クリア */
+        .btn-close { background: #78909c; color: #fff; grid-column: span 5; height: 35px; font-size: 14px; margin-top: 5px; }
 
-        /* スペース調整 */
-        .bottom-spacer { height: 250px; }
+        .bottom-spacer { height: 280px; }
     </style>
 </head>
 <body>
@@ -97,11 +101,10 @@
 </table>
 
 <div class="bottom-spacer"></div>
-
 <div id="numpad"></div>
 
 <script>
-// --- 機材データ (抜粋) ---
+// 機材データ
 const masterData = [
     { genre: "ARRI HMI", name: "9kw MAX", stock: 2 },
     { genre: "ARRI HMI", name: "4kw MAX", stock: 2 },
@@ -112,6 +115,7 @@ const masterData = [
     { genre: "ARRI HMI", name: "1.2kw CP", stock: 2 },
     { genre: "ARRI HMI", name: "800w MAX", stock: 4 },
     { genre: "ARRI HMI", name: "200w PAR", stock: 2 },
+    { genre: "ARRI HMI", name: "200w CP", stock: 0 },
     { genre: "LED(Flat)", name: "Skypanel S360C", stock: 2 },
     { genre: "LED(Flat)", name: "S360Cキメラ", stock: 2 },
     { genre: "LED(Flat)", name: "Skypanel S60C", stock: 8 },
@@ -127,18 +131,17 @@ const masterData = [
     { genre: "Support", name: "ウエイト", stock: 40 },
     { genre: "Ladder", name: "脚立6尺", stock: 2 },
     { genre: "Ladder", name: "脚立4尺", stock: 2 }
-    // ... 必要に応じて他データも追加
 ];
 
 const palette = ["#e3f2fd", "#f1f8e9", "#fff3e0", "#f3e5f5", "#e0f2f1", "#fff9c4"];
 const genreColors = {};
 let colorIdx = 0;
 let currentTarget = null;
+let isFirstTap = true; // 上書きモード判定用
 
 const tableBody = document.getElementById('tableBody');
 const numpad = document.getElementById('numpad');
 
-// テーブル生成
 masterData.forEach((item, index) => {
     if (!genreColors[item.genre]) {
         genreColors[item.genre] = palette[colorIdx % palette.length];
@@ -149,66 +152,82 @@ masterData.forEach((item, index) => {
     tr.innerHTML = `
         <td class="col-name" style="background-color:${genreColors[item.genre]}">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
-        ${[0,1,2,3,4].map(c => `
-            <td class="${c % 2 === 0 ? 'bg-guide' : ''}">
-                <div class="input-cell is-zero" data-row="${index}" data-col="${c}" onclick="openNumpad(this)">0</div>
-            </td>
-        `).join('')}
+        ${[0,1,2,3,4].map(c => `<td class="${c%2===0?'bg-guide':''}"><div class="input-cell is-zero" data-row="${index}" data-col="${c}" onclick="openNumpad(this)">0</div></td>`).join('')}
     `;
     tableBody.appendChild(tr);
 });
 
-// テンキーを開く
 function openNumpad(el) {
     if (currentTarget) currentTarget.classList.remove('active-cell');
     currentTarget = el;
     currentTarget.classList.add('active-cell');
+    isFirstTap = true; // セル選択直後は上書きモード
 
     const stock = parseInt(masterData[el.dataset.row].stock);
-    numpad.innerHTML = '';
+    renderNumpad(stock);
     numpad.style.display = 'grid';
+}
 
-    // 10以下ならその数まで、それ以上なら標準テンキー
-    const maxBtn = stock <= 10 ? stock : 12; // 12は便宜上の数
-    
-    for (let i = 0; i <= (stock <= 10 ? stock : 9); i++) {
-        const btn = document.createElement('button');
-        btn.className = 'num-btn';
-        btn.innerText = i;
-        btn.onclick = () => setNumber(i);
-        numpad.appendChild(btn);
-    }
+function renderNumpad(stock) {
+    numpad.innerHTML = '';
 
-    if (stock > 10) {
-        // 10個以上ある機材用の追加ボタン
-        [10, 20, 30, 50].filter(n => n <= stock).forEach(n => {
-            const btn = document.createElement('button');
-            btn.className = 'num-btn';
-            btn.innerText = n;
-            btn.style.backgroundColor = '#ffd54f';
-            btn.onclick = () => setNumber(n);
-            numpad.appendChild(btn);
+    // 在庫10以下の場合はシンプルボタン、それ以上は合算ボタン
+    if (stock <= 10) {
+        for (let i = 0; i <= stock; i++) {
+            addBtn(i, () => { currentTarget.innerText = i; finalizeInput(); });
+        }
+    } else {
+        // 1の位 (0-9)
+        for (let i = 1; i <= 9; i++) addBtn(i, () => appendNumber(i));
+        addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
+        addBtn(0, () => appendNumber(0));
+        
+        // 10の位
+        [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].forEach(n => {
+            if (n <= stock) addBtn("+" + n, () => appendNumber(n), "btn-10s");
         });
     }
 
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'num-btn num-close';
-    closeBtn.innerText = '閉じる';
-    closeBtn.onclick = () => {
-        numpad.style.display = 'none';
-        currentTarget.classList.remove('active-cell');
-    };
+    closeBtn.className = 'num-btn btn-close';
+    closeBtn.innerText = '決定・閉じる';
+    closeBtn.onclick = () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); };
     numpad.appendChild(closeBtn);
 }
 
-function setNumber(num) {
-    if (!currentTarget) return;
-    currentTarget.innerText = num;
-    if (num > 0) currentTarget.classList.remove('is-zero');
-    else currentTarget.classList.add('is-zero');
+function addBtn(text, action, extraClass = "") {
+    const btn = document.createElement('button');
+    btn.className = `num-btn ${extraClass}`;
+    btn.innerText = text;
+    btn.onclick = action;
+    numpad.appendChild(btn);
+}
+
+function appendNumber(num) {
+    let currentVal = parseInt(currentTarget.innerText) || 0;
     
+    if (isFirstTap) {
+        // 最初は上書き
+        currentVal = num;
+        isFirstTap = false;
+    } else {
+        // 2回目以降は加算
+        currentVal += num;
+    }
+
+    // 在庫上限チェック
+    const stock = parseInt(masterData[currentTarget.dataset.row].stock);
+    if (currentVal > stock) currentVal = stock;
+
+    currentTarget.innerText = currentVal;
+    finalizeInput();
+}
+
+function finalizeInput() {
+    const val = parseInt(currentTarget.innerText);
+    if (val > 0) currentTarget.classList.remove('is-zero');
+    else currentTarget.classList.add('is-zero');
     calculateRow(currentTarget.dataset.row);
-    // 連続入力しやすいようテンキーは閉じない
 }
 
 function calculateRow(rowIndex) {
@@ -216,11 +235,7 @@ function calculateRow(rowIndex) {
     const cells = row.querySelectorAll('.input-cell');
     const remainCell = document.getElementById(`remain-${rowIndex}`);
     let totalUsed = 0;
-
-    cells.forEach(cell => {
-        totalUsed += parseInt(cell.innerText) || 0;
-    });
-
+    cells.forEach(cell => { totalUsed += parseInt(cell.innerText) || 0; });
     const currentRemain = parseInt(row.dataset.stock) - totalUsed;
     remainCell.innerText = currentRemain;
     remainCell.style.backgroundColor = currentRemain < 0 ? "#ff0000" : "#fffafa";
@@ -231,8 +246,7 @@ function resetColumn(colIndex) {
     if (!confirm(`列のデータをリセットしますか？`)) return;
     document.querySelectorAll('#tableBody tr').forEach((row, rowIndex) => {
         const cell = row.querySelectorAll('.input-cell')[colIndex];
-        cell.innerText = 0;
-        cell.classList.add('is-zero');
+        cell.innerText = 0; cell.classList.add('is-zero');
         calculateRow(rowIndex);
     });
 }
@@ -241,34 +255,27 @@ function generateShareLink() {
     const allValues = [];
     document.querySelectorAll('.input-cell').forEach(cell => allValues.push(cell.innerText));
     const headerNames = Array.from(document.querySelectorAll('.header-input')).map(i => encodeURIComponent(i.value));
-    const baseUrl = window.location.href.split('?')[0];
-    const shareUrl = `${baseUrl}?h=${headerNames.join(',')}&d=${allValues.join(',')}`;
-
-    navigator.clipboard.writeText(shareUrl).then(() => {
-        alert("共有URLをコピーしました！");
-    }).catch(() => prompt("コピーして送ってください：", shareUrl));
+    const shareUrl = `${window.location.href.split('?')[0]}?h=${headerNames.join(',')}&d=${allValues.join(',')}`;
+    navigator.clipboard.writeText(shareUrl).then(() => alert("共有URLをコピーしました！")).catch(() => prompt("コピー：", shareUrl));
 }
 
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
-    const d = params.get('d');
-    const h = params.get('h');
-
+    const d = params.get('d'), h = params.get('h');
     if (h) {
         const names = h.split(',');
         document.querySelectorAll('.header-input').forEach((input, i) => { if(names[i]) input.value = decodeURIComponent(names[i]); });
     }
     if (d) {
-        const vals = d.split(',');
+        const vals = d.split(','), rows = document.querySelectorAll('#tableBody tr');
         let idx = 0;
-        document.querySelectorAll('#tableBody tr').forEach((row, rowIndex) => {
+        rows.forEach((row, rIdx) => {
             row.querySelectorAll('.input-cell').forEach(cell => {
-                const v = vals[idx] || 0;
+                const v = vals[idx++] || 0;
                 cell.innerText = v;
                 if (v > 0) cell.classList.remove('is-zero');
-                idx++;
             });
-            calculateRow(rowIndex);
+            calculateRow(rIdx);
         });
     }
 };
