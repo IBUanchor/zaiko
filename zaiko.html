@@ -53,21 +53,26 @@
         .is-zero { color: #ccc !important; }
         /* ヘッダーの入力枠のスタイル */
         .header-input {
-            width: 20px;            /* 縦書きに見えるように幅を制限 */
-            background: transparent;
+            width: 35px;            /* 縦書きに見えるように幅を制限 */
+            height:80px;
+            background: #333;
             color: #fff;
-            border: 1px solid #555; /* 入力できることがわかるよう薄く枠線 */
-            font-size: 14px;
+            border: 1px solid #777; /* 入力できることがわかるよう薄く枠線 */
+            font-size: 16px;
             font-weight: bold;
             text-align: center;
-            line-height: 1.1;
-            word-break: break-all;  /* 自動で改行させて縦書きに見せる */
             outline: none;
             padding: 2px 0;
+            border-radius: 4px;
+            /* 確実に縦書きにする設定 */
+            writing-mode: vertical-rl; 
+            text-orientation: upright;
+            display: block;
+            margin: 0 auto;
         }
         .header-input:focus {
-            background: #333;       /* タップした時に少し明るく */
-            border-color: #fff;
+            background: #444;       /* タップした時に少し明るく */
+            border-color: #007bff;
 }
     </style>
 </head>
@@ -561,6 +566,7 @@ function resetColumn(colIndex) {
 </script>
 </body>
 </html>
+
 
 
 
