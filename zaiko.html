@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <meta name="format-detection" content="telephone=no, address=no, email=no">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>機材員数管理 (完全リセット版)</title>
@@ -80,6 +81,12 @@
         .btn-close { background: #78909c; color: #fff; }
 
         .bottom-spacer { height: 400px; }
+        /* すべてのリンク（勝手に貼られたものを含む）の装飾を消す */
+        a, [href] {
+            text-decoration: none !important;
+            color: inherit !important;
+            pointer-events: none !important; /* リンクを無効化 */
+        }
     </style>
 </head>
 <body>
@@ -694,6 +701,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
