@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材員数管理システム (合算テンキー版)</title>
+    <title>機材員数管理 (シンプルテンキー版)</title>
     <style>
         * { box-sizing: border-box; font-family: sans-serif; touch-action: manipulation; }
         html, body { margin: 0; padding: 0; width: 100%; background-color: #fff; overflow-x: hidden; }
 
-        /* 共有ボタンエリア */
         .share-container {
             padding: 10px; background: #f8f9fa; text-align: center;
             border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 200;
@@ -20,7 +19,6 @@
 
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 
-        /* ヘッダー */
         thead th {
             position: sticky; top: 60px; z-index: 100;
             background-color: #000; color: #fff; height: 140px;
@@ -46,7 +44,6 @@
         .col-name { font-size: 12px; font-weight: bold; padding-left: 6px; text-align: left !important; overflow: hidden; }
         .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
 
-        /* 入力セル */
         .input-cell {
             width: 100%; height: 60px; font-size: 18px; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
@@ -56,27 +53,26 @@
         .bg-guide { background-color: rgba(0,0,0,0.03); }
         .active-cell { background-color: #bbdefb !important; color: #000 !important; border: 2px solid #007bff; }
 
-        /* カスタムテンキー */
+        /* カスタムテンキー (3列または4列で大きく) */
         #numpad {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: #444; padding: 10px; display: none;
-            grid-template-columns: repeat(5, 1fr); gap: 6px;
+            background: #444; padding: 15px; display: none;
+            grid-template-columns: repeat(4, 1fr); gap: 10px;
             z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
         }
         .num-btn {
-            background: #fff; border: none; border-radius: 6px;
-            height: 55px; font-size: 18px; font-weight: bold;
+            background: #fff; border: none; border-radius: 8px;
+            height: 65px; font-size: 22px; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 0 #bbb;
+            box-shadow: 0 3px 0 #bbb;
         }
         .num-btn:active { background: #ddd; transform: translateY(2px); box-shadow: none; }
         
-        /* 特殊ボタン色 */
-        .btn-10s { background: #ffd54f; } /* 10の位 */
-        .btn-clear { background: #ff8a65; color: #fff; } /* クリア */
-        .btn-close { background: #78909c; color: #fff; grid-column: span 5; height: 35px; font-size: 14px; margin-top: 5px; }
+        .btn-10s { background: #ffd54f; grid-column: span 1; } /* +10ボタン */
+        .btn-clear { background: #ff8a65; color: #fff; } /* Cボタン */
+        .btn-close { background: #78909c; color: #fff; grid-column: span 4; height: 45px; font-size: 16px; margin-top: 5px; }
 
-        .bottom-spacer { height: 280px; }
+        .bottom-spacer { height: 350px; }
     </style>
 </head>
 <body>
@@ -104,7 +100,7 @@
 <div id="numpad"></div>
 
 <script>
-// 機材データ
+// --- 機材データ ---
 const masterData = [
     { genre: "ARRI HMI", name: "9kw MAX", stock: 2 },
     { genre: "ARRI HMI", name: "4kw MAX", stock: 2 },
@@ -117,27 +113,18 @@ const masterData = [
     { genre: "ARRI HMI", name: "200w PAR", stock: 2 },
     { genre: "ARRI HMI", name: "200w CP", stock: 0 },
     { genre: "LED(Flat)", name: "Skypanel S360C", stock: 2 },
-    { genre: "LED(Flat)", name: "S360Cキメラ", stock: 2 },
     { genre: "LED(Flat)", name: "Skypanel S60C", stock: 8 },
-    { genre: "LED(Flat)", name: "S60C キメラ", stock: 2 },
-    { genre: "LED(Flat)", name: "Skypanel S30C", stock: 4 },
-    { genre: "LED(Flat)", name: "S30C キメラ", stock: 2 },
-    { genre: "LED(Flat)", name: "Redback", stock: 2 },
     { genre: "Grip", name: "ジョーズクランプ", stock: 27 },
-    { genre: "Grip", name: "ミニジョーズクランプ", stock: 8 },
     { genre: "Grip", name: "エレンクリップ", stock: 100 },
     { genre: "Stands", name: "40`センチュリー", stock: 29 },
-    { genre: "Stands", name: "20`センチュリー", stock: 29 },
-    { genre: "Support", name: "ウエイト", stock: 40 },
-    { genre: "Ladder", name: "脚立6尺", stock: 2 },
-    { genre: "Ladder", name: "脚立4尺", stock: 2 }
+    { genre: "Support", name: "ウエイト", stock: 40 }
 ];
 
 const palette = ["#e3f2fd", "#f1f8e9", "#fff3e0", "#f3e5f5", "#e0f2f1", "#fff9c4"];
 const genreColors = {};
 let colorIdx = 0;
 let currentTarget = null;
-let isFirstTap = true; // 上書きモード判定用
+let isFirstTap = true;
 
 const tableBody = document.getElementById('tableBody');
 const numpad = document.getElementById('numpad');
@@ -161,7 +148,7 @@ function openNumpad(el) {
     if (currentTarget) currentTarget.classList.remove('active-cell');
     currentTarget = el;
     currentTarget.classList.add('active-cell');
-    isFirstTap = true; // セル選択直後は上書きモード
+    isFirstTap = true;
 
     const stock = parseInt(masterData[el.dataset.row].stock);
     renderNumpad(stock);
@@ -171,26 +158,26 @@ function openNumpad(el) {
 function renderNumpad(stock) {
     numpad.innerHTML = '';
 
-    // 在庫10以下の場合はシンプルボタン、それ以上は合算ボタン
     if (stock <= 10) {
-        for (let i = 0; i <= stock; i++) {
+        // 在庫10以下なら必要な数だけボタンを出す (0は除外)
+        for (let i = 1; i <= stock; i++) {
             addBtn(i, () => { currentTarget.innerText = i; finalizeInput(); });
         }
     } else {
-        // 1の位 (0-9)
-        for (let i = 1; i <= 9; i++) addBtn(i, () => appendNumber(i));
-        addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
-        addBtn(0, () => appendNumber(0));
-        
-        // 10の位
-        [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].forEach(n => {
-            if (n <= stock) addBtn("+" + n, () => appendNumber(n), "btn-10s");
-        });
+        // 在庫10超なら 1-9 ボタン
+        for (let i = 1; i <= 9; i++) {
+            addBtn(i, () => appendNumber(i));
+        }
+        // +10 ボタン (黄色)
+        addBtn("+10", () => appendNumber(10), "btn-10s");
     }
+
+    // クリアボタン（全機材共通）
+    addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'num-btn btn-close';
-    closeBtn.innerText = '決定・閉じる';
+    closeBtn.innerText = '決定';
     closeBtn.onclick = () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); };
     numpad.appendChild(closeBtn);
 }
@@ -207,15 +194,12 @@ function appendNumber(num) {
     let currentVal = parseInt(currentTarget.innerText) || 0;
     
     if (isFirstTap) {
-        // 最初は上書き
         currentVal = num;
         isFirstTap = false;
     } else {
-        // 2回目以降は加算
         currentVal += num;
     }
 
-    // 在庫上限チェック
     const stock = parseInt(masterData[currentTarget.dataset.row].stock);
     if (currentVal > stock) currentVal = stock;
 
