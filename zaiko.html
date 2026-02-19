@@ -5,122 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>機材管理</title>
     <style>
-        /* 全体をゴシック体で統一 */
         * {
             box-sizing: border-box;
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
         }
 
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            /* 左右のふらつき（横スクロール）を禁止 */
-            overflow-x: hidden; 
-            background-color: #fff;
-        }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow-x: hidden; background-color: #fff; }
 
-        /* テーブル構造 */
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            table-layout: fixed; /* 列幅を固定 */
-        }
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 
-        /* ヘッダー固定：入力時も消えないよう設定 */
         thead th {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background-color: #000;
-            color: #fff;
-            height: 120px;
-            padding: 0;
-            vertical-align: middle;
-            border: none;
+            position: sticky; top: 0; z-index: 100;
+            background-color: #000; color: #fff;
+            height: 120px; padding: 0; vertical-align: middle; border: none;
         }
 
-        /* 縦書きテキスト */
-        .v-text-box {
-            display: inline-block;
-            font-size: 14px;
-            line-height: 1.1;
-            width: 1em;
-            font-weight: bold;
-        }
+        .v-text-box { display: inline-block; font-size: 14px; line-height: 1.1; width: 1em; font-weight: bold; }
 
-        /* リセットボタン */
         .reset-btn {
-            display: block;
-            margin: 8px auto 0;
-            padding: 5px 0;
-            width: 85%;
-            font-size: 11px;
-            background: #e74c3c;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
+            display: block; margin: 8px auto 0; padding: 5px 0; width: 85%;
+            font-size: 11px; background: #e74c3c; color: #fff;
+            border: none; border-radius: 4px; font-weight: bold;
         }
 
-        /* 列幅：合計100% */
         .w-name   { width: 34%; }
         .w-remain { width: 12%; }
         .w-shoot  { width: 10.8%; }
 
-        td {
-            padding: 0;
-            text-align: center;
-            vertical-align: middle;
-            border-bottom: 1px solid #ddd;
-        }
+        td { padding: 0; text-align: center; vertical-align: middle; border-bottom: 1px solid #ddd; }
 
-        /* 機材名：ゴシック体・フォント小 */
         .col-name {
-            font-size: 10px;
-            font-weight: bold;
-            color: #333;
-            text-align: left !important;
-            padding-left: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 10px; font-weight: bold; color: #000;
+            text-align: left !important; padding-left: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* 残り数量 */
-        .col-remain {
-            font-size: 18px;
-            font-weight: 900;
-            color: #d32f2f;
-            background-color: #fffafa;
-        }
+        .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
 
-        /* 入力エリア */
         input[type="number"] {
-            width: 100%;
-            height: 60px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-            border: none;
-            background-color: transparent;
-            outline: none;
-            display: block;
-            border-radius: 0;
-            -webkit-appearance: none;
-            color: #000;
+            width: 100%; height: 60px; font-size: 16px; font-weight: bold;
+            text-align: center; border: none; background-color: transparent;
+            outline: none; display: block; -webkit-appearance: none; color: #000;
         }
 
-        /* 視認性のためのガイド背景 */
-        .bg-guide { background-color: #f7f7f7; }
+        .bg-guide { background-color: rgba(0,0,0,0.03); }
         input:focus { background-color: #e8f0fe !important; }
-
-        input::-webkit-outer-spin-button, 
-        input::-webkit-inner-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
     </style>
 </head>
 <body>
@@ -137,97 +66,437 @@
             <th class="w-shoot"><span class="v-text-box">撮影５</span><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
         </tr>
     </thead>
-    <tbody id="tableBody">
-        </tbody>
+    <tbody id="tableBody"></tbody>
 </table>
 
 <script>
-// サンプルデータ（行数を増やしてスクロールを確認できるようにしています）
+// ジャンル付きマスターデータ（例として一部作成。ここに全データを流し込んでください）
 const masterData = [
-    { name: "9kw MAX", stock: 2 },
-    { name: "4kw MAX", stock: 2 },
-    { name: "4kw CP", stock: 2 },
-    { name: "2.5kw CP", stock: 3 },
-    { name: "1.8kw MAX", stock: 4 },
-    { name: "1.2kw MAX", stock: 4 },
-    { name: "1.2kw CP", stock: 2 },
-    { name: "800w MAX", stock: 4 },
-    { name: "200w PAR", stock: 2 },
-    { name: "200w CP", stock: 0 },
-    { name: "Skypanel S360C", stock: 2 },
-    { name: "S360Cキメラ", stock: 2 },
-    { name: "Skypanel S60C", stock: 8 },
-    { name: "S60C キメラ", stock: 2 },
-    { name: "Skypanel S30C", stock: 4 },
-    { name: "S30C キメラ", stock: 2 },
-    { name: "Skypanel クランプ", stock: 2 },
-    { name: "ジョーズクランプ", stock: 27 },
-    { name: "ミニジョーズクランプ", stock: 8 },
-    { name: "ロングジョーズ", stock: 12 },
-    { name: "センタージョーズ", stock: 8 },
-    { name: "グリップヘッド", stock: 33 },
-    { name: "ホームコアバサミ", stock: 9 },
-    { name: "ホームコアバサミ ミニ", stock: 4 },
-    { name: "エレンクリップ", stock: 100 },
-    { name: "シングルクランプ", stock: 21 },
-    { name: "U字フック", stock: 2 },
-    { name: "セーフティーワイヤー", stock: 30 },
-    { name: "ビッグベンクランプ", stock: 6 },
-    { name: "28φ→17φ 変換", stock: 6 },
-    { name: "チューブトロリー", stock: 4 },
-    { name: "1ｋハンガー", stock: 6 },
-    { name: "Mハンガー", stock: 9 },
-    { name: "バタフライヘッド", stock: 8 },
-    { name: "バタフライクランプセット", stock: 8 },
-    { name: "オフセットアーム", stock: 2 },
-    { name: "フラッグクランプ", stock: 4 },
-    { name: "S字フック", stock: 20 },
-    { name: "Fクランプ 大", stock: 28 },
-    { name: "Fクランプ 小", stock: 4 },
-    { name: "3×6 カポックバサミ", stock: 9 },
-    { name: "4×8 カポックバサミ", stock: 5 },
-    { name: "クォーカークランプ", stock: 6 },
-    { name: "チューブクランプ", stock: 8 },
-    { name: "スピードグリップ", stock: 10 },
-    { name: "アクセサリーボックス", stock: 2 },
-    { name: "ストラセーフスタンド", stock: 2 },
-    { name: "Aクランクスタンド", stock: 2 },
-    { name: "マンボコンボスタンド", stock: 2 },
-    { name: "マンボキャスターセット", stock: 6 },
-    { name: "ハイコンボスタンド", stock: 8 },
-    { name: "コンボスタンド", stock: 8 },
-    { name: "ローコンボスタンド", stock: 6 },
-    { name: "ベビーコンボスタンド", stock: 4 },
-    { name: "アルミ ハイコンボ", stock: 6 },
-    { name: "アルミ コンボ", stock: 6 },
-    { name: "アルミ ローコンボ", stock: 6 },
-    { name: "スタンドキャスターセット", stock: 10 },
-    { name: "エアーキャスターセット", stock: 4 },
-    { name: "1kスタンド", stock: 8 },
-    { name: "マンフロットスタンド", stock: 8 },
-    { name: "アルミランカースタンド", stock: 4 },
-    { name: "ウッドスタンドセット", stock: 21 },
-    { name: "アルミウッドスタンド", stock: 1 },
-    { name: "ランウェイスタンド", stock: 5 },
-    { name: "5kロースタンド", stock: 2 },
-    { name: "ウォールプレート", stock: 9 },
-    { name: "40`センチュリー", stock: 29 },
-    { name: "20`センチュリー", stock: 29 },
-    { name: "コンボバズーカ", stock: 2 },
-    { name: "スタンドカーゴ", stock: 2 },
-    { name: "センチュリーカーゴ(6本)", stock: 1 },
-    { name: "センチュリーカーゴ(4本)", stock: 1 }
-];  
+    { genre: "ARRI HMI", name: "9kw MAX", stock: 2 },
+    { genre: "ARRI HMI", name: "4kw MAX", stock: 2 },
+    { genre: "ARRI HMI", name: "4kw CP", stock: 2 },
+    { genre: "ARRI HMI", name: "2.5kw CP", stock: 3 },
+    { genre: "ARRI HMI", name: "1.8kw MAX", stock: 4 },
+    { genre: "ARRI HMI", name: "1.2kw MAX", stock: 4 },
+    { genre: "ARRI HMI", name: "1.2kw CP", stock: 2 },
+    { genre: "ARRI HMI", name: "800w MAX", stock: 4 },
+    { genre: "ARRI HMI", name: "200w PAR", stock: 2 },
+    { genre: "ARRI HMI", name: "200w CP", stock: 0 },
+    { genre: "LED(Flat)", name: "Skypanel S360C", stock: 2 },
+    { genre: "LED(Flat)", name: "S360Cキメラ", stock: 2 },
+    { genre: "LED(Flat)", name: "Skypanel S60C", stock: 8 },
+    { genre: "LED(Flat)", name: "S60C キメラ", stock: 2 },
+    { genre: "LED(Flat)", name: "Skypanel S30C", stock: 4 },
+    { genre: "LED(Flat)", name: "S30C キメラ", stock: 2 },
+    { genre: "LED(Flat)", name: "Skypanel クランプ", stock: 2 },
+    { genre: "LED(Flat)", name: "センターマウントヨーク", stock: 2 },
+    { genre: "LED(Flat)", name: "Redback", stock: 2 },
+    { genre: "LED(Flat)", name: "Mozzie", stock: 2 },
+    { genre: "LED(Flat)", name: "Hudosn クランプ", stock: 2 },
+    { genre: "LED(Flat)", name: "Redback ステレス", stock: 1 },
+    { genre: "LED(Flat)", name: "Mozzie ステレス", stock: 1 },
+    { genre: "LED(Flat)", name: "Hudoson用Parabolix", stock: 1 },
+    { genre: "LED(Flat)", name: "Umbrella セット", stock: 2 },
+    { genre: "LED(Flat)", name: "PavoSlim 120C", stock: 2 },
+    { genre: "LED(Flat)", name: "PavoSlim キット", stock: 1 },
+    { genre: "LED(Flat)", name: "Bi-Flex 1×4", stock: 2 },
+    { genre: "LED(Flat)", name: "Bi-Flex 1×2", stock: 1 },
+    { genre: "LED(Flat)", name: "Bi-Flex 1×1", stock: 2 },
+    { genre: "LED(Flat)", name: "1×1 Gemini", stock: 2 },
+    { genre: "LED(Flat)", name: "1×1 Gemini キメラ", stock: 2 },
+    { genre: "LED(Flat)", name: "Kelvin Board", stock: 2 },
+    { genre: "LED(Flat)", name: "ライトパッドセット", stock: 1 },
+    { genre: "LED(Flat)", name: "Micro Bender", stock: 2 },
+    { genre: "LED(Spot)", name: "Evoke 2400B", stock: 2 },
+    { genre: "LED(Spot)", name: "Evoke 1200B", stock: 2 },
+    { genre: "LED(Spot)", name: "FL-35YK", stock: 1 },
+    { genre: "LED(Spot)", name: "FL-28", stock: 5 },
+    { genre: "LED(Spot)", name: "Evoke用 Softbox 120", stock: 1 },
+    { genre: "LED(Spot)", name: "Evoke用 Softbox 150", stock: 1 },
+    { genre: "LED(Spot)", name: "Evoke用 Lantern 120", stock: 1 },
+    { genre: "LED(Spot)", name: "Evoke用Spot変換", stock: 2 },
+    { genre: "LED(Spot)", name: "Forza 500", stock: 3 },
+    { genre: "LED(Spot)", name: "Forza 500フレネル", stock: 3 },
+    { genre: "LED(Spot)", name: "Forza 60", stock: 4 },
+    { genre: "LED(Spot)", name: "Forza 60レンズセット", stock: 2 },
+    { genre: "LED(Spot)", name: "Forza 60キメラ", stock: 2 },
+    { genre: "LED(Spot)", name: "バッテリーグリップ", stock: 2 },
+    { genre: "LED(Spot)", name: "600d Pro", stock: 2 },
+    { genre: "LED(Spot)", name: "600x Pro", stock: 3 },
+    { genre: "LED(Spot)", name: "Fresnel F10", stock: 4 },
+    { genre: "LED(Spot)", name: "F10用バンドアセット", stock: 4 },
+    { genre: "LED(Spot)", name: "300dⅡ", stock: 4 },
+    { genre: "LED(Spot)", name: "300X", stock: 4 },
+    { genre: "LED(Spot)", name: "Fresnel 2X", stock: 4 },
+    { genre: "LED(Spot)", name: "2X用バンドアセット", stock: 4 },
+    { genre: "LED(Spot)", name: "Aputure Lantern", stock: 2 },
+    { genre: "LED(Spot)", name: "Aputure Spotlight19°", stock: 2 },
+    { genre: "LED(Spot)", name: "Aputure Spotlight26°", stock: 2 },
+    { genre: "LED(Spot)", name: "Aputure LightdoomMini", stock: 2 },
+    { genre: "LED(Spot)", name: "Aputure Lightdoom", stock: 3 },
+    { genre: "LED(Spot)", name: "soft BOX150", stock: 2 },
+    { genre: "LED(Spot)", name: "soft BOX120", stock: 4 },
+    { genre: "LED(Spot)", name: "soft BOX90", stock: 2 },
+    { genre: "LED(Spot)", name: "Dedo7.1セット", stock: 3 },
+    { genre: "LED(Spot)", name: "B.B Light", stock: 8 },
+    { genre: "LED(Spot)", name: "LED LenserP17.2", stock: 2 },
+    { genre: "LED(Spot)", name: "Parabolix30（76cm）", stock: 1 },
+    { genre: "LED(Spot Color)", name: "Evoke 900C", stock: 4 },
+    { genre: "LED(Spot Color)", name: "Nanlite FC120C", stock: 2 },
+    { genre: "LED(Spot Color)", name: "Nanlite FC500C", stock: 4 },
+    { genre: "LED(Spot Color)", name: "FCシリーズ用Lantern", stock: 2 },
+    { genre: "LED(Spot Color)", name: "FCシリーズ用Softbox40", stock: 2 },
+    { genre: "LED(Spot Color)", name: "FCシリーズ用Softbox60", stock: 2 },
+    { genre: "LED(Spot Color)", name: "FCシリーズ用Bm40", stock: 2 },
+    { genre: "LED(Spot Color)", name: "FCシリーズ用Bm70", stock: 2 },
+    { genre: "LED(Spot Color)", name: "Orbiter", stock: 1 },
+    { genre: "LED(Spot Color)", name: "Orbiter レンズセット", stock: 2 },
+    { genre: "LED(Spot Color)", name: "Orbiter Lantern", stock: 2 },
+    { genre: "LED(Spot Color)", name: "Orbiter Spot25°", stock: 2 },
+    { genre: "LED(Spot Color)", name: "Orbiter Octa4", stock: 1 },
+    { genre: "LED(Spot Color)", name: "Q8", stock: 2 },
+    { genre: "LED(Spot Color)", name: "Q8 Ocuta4", stock: 2 },
+    { genre: "LED(Spot Color)", name: "P3Colorセット", stock: 2 },
+    { genre: "LED(Spot Color)", name: "P3ソフトボックスセット", stock: 2 },
+    { genre: "LED(Spot Color)", name: "Source Four LED Lustr+", stock: 2 },
+    { genre: "LED(Bulb)", name: "Luna", stock: 2 },
+    { genre: "LED(Bulb)", name: "NYX", stock: 1 },
+    { genre: "LED(Bulb)", name: "SORA", stock: 1 },
+    { genre: "LED(Bulb)", name: "B7C", stock: 1 },
+    { genre: "LED(Bulb)", name: "ボール球", stock: 2 },
+    { genre: "LED(Bulb)", name: "アイランプモーガル", stock: 8 },
+    { genre: "LED(Tube)", name: "titan tubeセット", stock: 2 },
+    { genre: "LED(Tube)", name: "titan tube", stock: 16 },
+    { genre: "LED(Tube)", name: "ASTERA BOX", stock: 2 },
+    { genre: "LED(Tube)", name: "titan用充電機", stock: 2 },
+    { genre: "LED(Tube)", name: "titan延長ケーブル", stock: 11 },
+    { genre: "LED(Tube)", name: "AirTube120", stock: 2 },
+    { genre: "LED(Tube)", name: "Q-Line 50w", stock: 2 },
+    { genre: "LED(Tube)", name: "Q-Line 25w", stock: 4 },
+    { genre: "LED(Tube)", name: "PAVO TUBE 6C", stock: 4 },
+    { genre: "LED(Tube)", name: "MC Pro", stock: 4 },
+    { genre: "Moving light", name: "スタンド土台", stock: 2 },
+    { genre: "Moving light", name: "Mac One", stock: 10 },
+    { genre: "Moving light", name: "Avolits　T2", stock: 1 },
+    { genre: "Tungsten", name: "750w Source Four", stock: 0 },
+    { genre: "Tungsten", name: "Dedo Light", stock: 0 },
+    { genre: "Light Other", name: "レールライトセット", stock: 1 },
+    { genre: "Light Other", name: "プロジェクター", stock: 1 },
+    { genre: "Light Other", name: "1.2/M8 スヌート", stock: 2 },
+    { genre: "Light Other", name: "SM5C", stock: 4 },
+    { genre: "Tablet", name: "iPad", stock: 2 },
+    { genre: "Tablet", name: "雲台セット", stock: 1 },
+    { genre: "Tablet", name: "タブレット台車", stock: 1 },
+    { genre: "Tablet", name: "Accsoon", stock: 1 },
+    { genre: "DMX", name: "DMXケーブルセット", stock: 1 },
+    { genre: "DMX", name: "DMXケーブル (20ｍ)", stock: 4 },
+    { genre: "DMX", name: "DMXケーブル (10ｍ)", stock: 6 },
+    { genre: "DMX", name: "DMXケーブル (5ｍ)", stock: 10 },
+    { genre: "DMX", name: "DMXケーブル (2.5ｍ)", stock: 6 },
+    { genre: "DMX", name: "スプリッター", stock: 2 },
+    { genre: "DMX", name: "Moonlite", stock: 7 },
+    { genre: "DMX", name: "USBPRO", stock: 1 },
+    { genre: "DMX", name: "Aurora", stock: 1 },
+    { genre: "DMX", name: "Nano Controller", stock: 1 },
+    { genre: "Battery", name: "Vマウントバッテリー", stock: 4 },
+    { genre: "Battery", name: "suaoki G1200 (1000w)", stock: 2 },
+    { genre: "Battery", name: "G1200 チャージャー", stock: 2 },
+    { genre: "Battery", name: "DELTA２ (1500w)", stock: 2 },
+    { genre: "Battery", name: "DELTA２Max (２０００w)", stock: 2 },
+    { genre: "Battery", name: "Ecoflowチャージャー", stock: 4 },
+    { genre: "Battery", name: "Sony バッテリー", stock: 0 },
+    { genre: "Battery", name: "2連チャージャー", stock: 0 },
+    { genre: "Flag", name: "4×4 フレーム", stock: 12 },
+    { genre: "Flag", name: "4×4 フレーム （鉄）", stock: 9 },
+    { genre: "Flag", name: "4×2 フレーム", stock: 6 },
+    { genre: "Flag", name: "4×1 フレーム", stock: 6 },
+    { genre: "Flag", name: "3×3 フレーム", stock: 12 },
+    { genre: "Flag", name: "2×2 フレーム", stock: 9 },
+    { genre: "Flag", name: "1×1 フレーム", stock: 10 },
+    { genre: "Flag", name: "120㎝サークルフレーム", stock: 4 },
+    { genre: "Flag", name: "90㎝サークルフレーム", stock: 4 },
+    { genre: "Flag", name: "60㎝サークルフレーム", stock: 4 },
+    { genre: "Flag", name: "30㎝サークルフレーム", stock: 4 },
+    { genre: "Flag", name: "4×4　UB", stock: 4 },
+    { genre: "Flag", name: "4×4フロッピー", stock: 4 },
+    { genre: "Flag", name: "4×2 フロッピー", stock: 4 },
+    { genre: "Flag", name: "黒フラッグ 大", stock: 15 },
+    { genre: "Flag", name: "黒フラッグ 中", stock: 18 },
+    { genre: "Flag", name: "黒フラッグ 小", stock: 3 },
+    { genre: "Flag", name: "フラッグカーゴ A", stock: 1 },
+    { genre: "Flag", name: "フラッグカーゴ B", stock: 1 },
+    { genre: "Flag", name: "フラッグカーゴ C", stock: 1 },
+    { genre: "Flag", name: "フラッグ台車", stock: 1 },
+    { genre: "Flag", name: "サバイバルキット", stock: 1 },
+    { genre: "Flag", name: "4×4 ネタセット", stock: 1 },
+    { genre: "Flag", name: "組み立てフレームセット", stock: 1 },
+    { genre: "Flag", name: "組み立てフレームダボ", stock: 2 },
+    { genre: "Butterfly", name: "分解　20×20", stock: 1 },
+    { genre: "Butterfly", name: "分解　20×10", stock: 2 },
+    { genre: "Butterfly", name: "分解　12×12", stock: 1 },
+    { genre: "Butterfly", name: "分解　12×9", stock: 2 },
+    { genre: "Butterfly", name: "分解　9×9", stock: 2 },
+    { genre: "Butterfly", name: "分解　6×9", stock: 2 },
+    { genre: "Butterfly", name: "分解　6×6", stock: 1 },
+    { genre: "Butterfly", name: "ストレート　20×20", stock: 0 },
+    { genre: "Butterfly", name: "ストレート　20×10", stock: 0 },
+    { genre: "Butterfly", name: "ストレート　12×12", stock: 2 },
+    { genre: "Butterfly", name: "ストレート　12×9", stock: 2 },
+    { genre: "Butterfly", name: "ストレート　9×9", stock: 2 },
+    { genre: "Butterfly", name: "ストレート　6×9", stock: 2 },
+    { genre: "Butterfly", name: "ストレート　6×6", stock: 1 },
+    { genre: "Cloth", name: "黒　12×12", stock: 3 },
+    { genre: "Cloth", name: "黒　12×9", stock: 3 },
+    { genre: "Cloth", name: "黒　9×9", stock: 2 },
+    { genre: "Cloth", name: "黒　6×9", stock: 3 },
+    { genre: "Cloth", name: "グレー　12×12", stock: 2 },
+    { genre: "Cloth", name: "グレー　12×9", stock: 2 },
+    { genre: "Cloth", name: "グレー　9×9", stock: 2 },
+    { genre: "Cloth", name: "グレー　6×9", stock: 2 },
+    { genre: "Cloth", name: "白　20×20", stock: 1 },
+    { genre: "Cloth", name: "白　12×12", stock: 2 },
+    { genre: "Cloth", name: "白　12×9", stock: 2 },
+    { genre: "Cloth", name: "白　9×9", stock: 2 },
+    { genre: "Cloth", name: "白　6×9", stock: 2 },
+    { genre: "Cloth", name: "GC　12×12", stock: 2 },
+    { genre: "Cloth", name: "GC　12×9", stock: 2 },
+    { genre: "Cloth", name: "GC　9×9", stock: 2 },
+    { genre: "Cloth", name: "LGC　12×12", stock: 2 },
+    { genre: "Cloth", name: "LGC　12×9", stock: 2 },
+    { genre: "Cloth", name: "LGC　9×9", stock: 2 },
+    { genre: "Cloth", name: "1/4GC　12×12", stock: 1 },
+    { genre: "Cloth", name: "1/4GC　12×9", stock: 1 },
+    { genre: "Cloth", name: "1/4GC　9×9", stock: 1 },
+    { genre: "Cloth", name: "キメラ　12×12", stock: 1 },
+    { genre: "Cloth", name: "キメラ　12×9", stock: 1 },
+    { genre: "Cloth", name: "キメラ　6×9", stock: 1 },
+    { genre: "Cloth", name: "土間　12×9", stock: 2 },
+    { genre: "Cloth", name: "UB　9×9", stock: 2 },
+    { genre: "Cloth", name: "10ｍ×8ｍサウスシーブルー", stock: 1 },
+    { genre: "Cloth", name: "20×20サウスシーブルー", stock: 1 },
+    { genre: "Cloth", name: "12×12サウスシーブルー", stock: 1 },
+    { genre: "Cloth", name: "20×20 (DG)", stock: 1 },
+    { genre: "Cloth", name: "12×9 (DG)", stock: 1 },
+    { genre: "Cloth", name: "12×12 (DB)", stock: 1 },
+    { genre: "Cloth", name: "12×9 (DB)", stock: 1 },
+    { genre: "Cloth", name: "4×8パンツ (G/B)", stock: 2 },
+    { genre: "Cloth", name: "3×6パンツ (G/B)", stock: 2 },
+    { genre: "Cloth", name: "3×6ボード (G/B)", stock: 1 },
+    { genre: "Cloth", name: "サウスシーパンチ (m)", stock: 0 },
+    { genre: "Cloth", name: "グリーンパンチ (m)", stock: 0 },
+    { genre: "Cloth", name: "ブルーパンチ (m)", stock: 0 },
+    { genre: "Cloth", name: "黒パンチ (m)", stock: 0 },
+    { genre: "Cloth", name: "黒8尺7m (BT)", stock: 2 },
+    { genre: "Cloth", name: "Yブラック", stock: 4 },
+    { genre: "Cloth", name: "3m×6m (ベージュ)", stock: 1 },
+    { genre: "Cloth", name: "黒シーツ (6m)", stock: 0 },
+    { genre: "Cloth", name: "黒シーツ (4ｍ)", stock: 0 },
+    { genre: "Cloth", name: "グレーシーツ (6ｍ)", stock: 0 },
+    { genre: "Cloth", name: "グレーシーツ (4ｍ)", stock: 0 },
+    { genre: "Cloth", name: "白シーツ (6ｍ)", stock: 0 },
+    { genre: "Cloth", name: "白シーツ (4ｍ)", stock: 0 },
+    { genre: "Cloth", name: "ベージュシーツ (1m)", stock: 0 },
+    { genre: "Cloth", name: "シーツセット A", stock: 2 },
+    { genre: "Cloth", name: "シーツセット B", stock: 2 },
+    { genre: "Grip", name: "ジョーズクランプ", stock: 27 },
+    { genre: "Grip", name: "ミニジョーズクランプ", stock: 8 },
+    { genre: "Grip", name: "ロングジョーズ", stock: 12 },
+    { genre: "Grip", name: "センタージョーズ", stock: 8 },
+    { genre: "Grip", name: "グリップヘッド", stock: 33 },
+    { genre: "Grip", name: "ホームコアバサミ", stock: 9 },
+    { genre: "Grip", name: "ホームコアバサミ ミニ", stock: 4 },
+    { genre: "Grip", name: "エレンクリップ", stock: 100 },
+    { genre: "Grip", name: "シングルクランプ", stock: 21 },
+    { genre: "Grip", name: "U字フック", stock: 2 },
+    { genre: "Grip", name: "セーフティーワイヤー", stock: 30 },
+    { genre: "Grip", name: "ビッグベンクランプ", stock: 6 },
+    { genre: "Grip", name: "28φ→17φ 変換", stock: 6 },
+    { genre: "Grip", name: "チューブトロリー", stock: 4 },
+    { genre: "Grip", name: "1ｋハンガー", stock: 6 },
+    { genre: "Grip", name: "Mハンガー", stock: 9 },
+    { genre: "Grip", name: "バタフライヘッド", stock: 8 },
+    { genre: "Grip", name: "バタフライクランプセット", stock: 8 },
+    { genre: "Grip", name: "オフセットアーム", stock: 2 },
+    { genre: "Grip", name: "フラッグクランプ", stock: 4 },
+    { genre: "Grip", name: "S字フック", stock: 20 },
+    { genre: "Grip", name: "Fクランプ 大", stock: 28 },
+    { genre: "Grip", name: "Fクランプ 小", stock: 4 },
+    { genre: "Grip", name: "3×6 カポックバサミ", stock: 9 },
+    { genre: "Grip", name: "4×8 カポックバサミ", stock: 5 },
+    { genre: "Grip", name: "クォーカークランプ", stock: 6 },
+    { genre: "Grip", name: "チューブクランプ", stock: 8 },
+    { genre: "Grip", name: "スピードグリップ", stock: 10 },
+    { genre: "Grip", name: "アクセサリーボックス", stock: 2 },
+    { genre: "Reflence/Mirror", name: "ゼノンミラーセット", stock: 2 },
+    { genre: "Reflence/Mirror", name: "マシューズ レフ", stock: 2 },
+    { genre: "Reflence/Mirror", name: "3×3ミラー", stock: 2 },
+    { genre: "Reflence/Mirror", name: "ライトストームセット", stock: 1 },
+    { genre: "Reflence/Mirror", name: "EFLECT", stock: 1 },
+    { genre: "Reflence/Mirror", name: "キャッチレフセット", stock: 2 },
+    { genre: "Reflence/Mirror", name: "サンバウンス", stock: 1 },
+    { genre: "Stands", name: "ストラセーフスタンド", stock: 2 },
+    { genre: "Stands", name: "Aクランクスタンド", stock: 2 },
+    { genre: "Stands", name: "マンボコンボスタンド", stock: 2 },
+    { genre: "Stands", name: "マンボキャスターセット", stock: 6 },
+    { genre: "Stands", name: "ハイコンボスタンド", stock: 8 },
+    { genre: "Stands", name: "コンボスタンド", stock: 8 },
+    { genre: "Stands", name: "ローコンボスタンド", stock: 6 },
+    { genre: "Stands", name: "ベビーコンボスタンド", stock: 4 },
+    { genre: "Stands", name: "アルミ ハイコンボ", stock: 6 },
+    { genre: "Stands", name: "アルミ コンボ", stock: 6 },
+    { genre: "Stands", name: "アルミ ローコンボ", stock: 6 },
+    { genre: "Stands", name: "スタンドキャスターセット", stock: 10 },
+    { genre: "Stands", name: "エアーキャスターセット", stock: 4 },
+    { genre: "Stands", name: "1kスタンド", stock: 8 },
+    { genre: "Stands", name: "マンフロットスタンド", stock: 8 },
+    { genre: "Stands", name: "アルミランカースタンド", stock: 4 },
+    { genre: "Stands", name: "ウッドスタンドセット", stock: 21 },
+    { genre: "Stands", name: "アルミウッドスタンド", stock: 1 },
+    { genre: "Stands", name: "ランウェイスタンド", stock: 5 },
+    { genre: "Stands", name: "5kロースタンド", stock: 2 },
+    { genre: "Stands", name: "ウォールプレート", stock: 9 },
+    { genre: "Stands", name: "40`センチュリー", stock: 29 },
+    { genre: "Stands", name: "20`センチュリー", stock: 29 },
+    { genre: "Stands", name: "コンボバズーカ", stock: 2 },
+    { genre: "Stands", name: "スタンドカーゴ", stock: 2 },
+    { genre: "Stands", name: "センチュリーカーゴ(6本)", stock: 1 },
+    { genre: "Stands", name: "センチュリーカーゴ(4本)", stock: 1 },
+    { genre: "Stands", name: "テニスボール", stock: 6 },
+    { genre: "Stands", name: "スタンド用靴下セット", stock: 0 },
+    { genre: "Boom", name: "メナスアーム", stock: 2 },
+    { genre: "Boom", name: "メナスアームウエイト", stock: 2 },
+    { genre: "Boom", name: "メガブーム", stock: 4 },
+    { genre: "Boom", name: "ＭＪブーム", stock: 2 },
+    { genre: "Boom", name: "ＭＪクランプセット", stock: 2 },
+    { genre: "Electric", name: "38φケーブル (20m)", stock: 12 },
+    { genre: "Electric", name: "38φケーブル (10m)", stock: 12 },
+    { genre: "Electric", name: "スパイダーボックス", stock: 3 },
+    { genre: "Electric", name: "Y型プラグ", stock: 3 },
+    { genre: "Electric", name: "取り出しカムロック", stock: 0 },
+    { genre: "Electric", name: "60Aケーブル", stock: 13 },
+    { genre: "Electric", name: "30Aケーブル", stock: 18 },
+    { genre: "Electric", name: "100A→60A分岐", stock: 2 },
+    { genre: "Electric", name: "60A→30A分岐", stock: 3 },
+    { genre: "Electric", name: "60Aボックス (黒)", stock: 1 },
+    { genre: "Electric", name: "60Aボックスタップ", stock: 4 },
+    { genre: "Electric", name: "30Aボックスタップ", stock: 6 },
+    { genre: "Electric", name: "ACタップコード", stock: 47 },
+    { genre: "Electric", name: "ドラムコード", stock: 4 },
+    { genre: "Electric", name: "6口ACタップ", stock: 0 },
+    { genre: "Electric", name: "ケーブルマット", stock: 4 },
+    { genre: "Electric", name: "30スクリュー→30メス", stock: 2 },
+    { genre: "Electric", name: "60スクリュー→60メス", stock: 1 },
+    { genre: "Electric", name: "60オス→カムロック", stock: 2 },
+    { genre: "Generator", name: "5.5ｋw", stock: 1 },
+    { genre: "Generator", name: "2.8ｋw", stock: 1 },
+    { genre: "Generator", name: "2.6ｋw", stock: 2 },
+    { genre: "Generator", name: "並列用ケーブルセット", stock: 1 },
+    { genre: "Generator", name: "1.8ｋw", stock: 1 },
+    { genre: "Generator", name: "予備タンク (20?)", stock: 2 },
+    { genre: "Generator", name: "予備タンク (10?)", stock: 1 },
+    { genre: "Pole", name: "オートポールジョイント(2ｍ)", stock: 24 },
+    { genre: "Pole", name: "オートポールジョイント(1.5ｍ)", stock: 7 },
+    { genre: "Pole", name: "オートポールジョイント(1ｍ)", stock: 11 },
+    { genre: "Pole", name: "オートポールコーナー", stock: 12 },
+    { genre: "Pole", name: "オートポール 大", stock: 4 },
+    { genre: "Pole", name: "オートポール 小", stock: 2 },
+    { genre: "Pole", name: "鉄管パイプ　4m", stock: 0 },
+    { genre: "Pole", name: "鉄管パイプ　3m", stock: 0 },
+    { genre: "Pole", name: "鉄管パイプ　2m", stock: 0 },
+    { genre: "Pole", name: "鉄管パイプ　1m", stock: 0 },
+    { genre: "Pole", name: "ライトパイプ", stock: 4 },
+    { genre: "Support", name: "インカム", stock: 11 },
+    { genre: "Support", name: "Solidcom　C1Pro", stock: 4 },
+    { genre: "Support", name: "ウエイト", stock: 40 },
+    { genre: "Support", name: "ウエイト （New）", stock: 40 },
+    { genre: "Support", name: "ボサセット", stock: 3 },
+    { genre: "Support", name: "アップルボックスセット", stock: 0 },
+    { genre: "Support", name: "アップルボックスフル", stock: 0 },
+    { genre: "Support", name: "アップルボックスハーフ", stock: 0 },
+    { genre: "Support", name: "アップルボックスクォーター", stock: 0 },
+    { genre: "Support", name: "グリップマット", stock: 0 },
+    { genre: "Support", name: "ザイルロープ (黒)", stock: 20 },
+    { genre: "Support", name: "ザイルロープ細 (青)", stock: 0 },
+    { genre: "Support", name: "細引き", stock: 0 },
+    { genre: "Support", name: "フィルターバック", stock: 3 },
+    { genre: "Support", name: "フィルターロールバック", stock: 1 },
+    { genre: "Support", name: "白テント", stock: 1 },
+    { genre: "Support", name: "カラビナセット", stock: 1 },
+    { genre: "Support", name: "バラクーダ―", stock: 4 },
+    { genre: "Support", name: "工具", stock: 1 },
+    { genre: "Support", name: "背負子", stock: 3 },
+    { genre: "Support", name: "巻き尺 (20ｍ)", stock: 2 },
+    { genre: "Support", name: "磁石セット", stock: 3 },
+    { genre: "Support", name: "Antari", stock: 1 },
+    { genre: "Support", name: "VIPPER", stock: 0 },
+    { genre: "Support", name: "イントレ (段)", stock: 0 },
+    { genre: "Support", name: "ハンドブロアー", stock: 2 },
+    { genre: "Support", name: "回転ミラー  大", stock: 1 },
+    { genre: "Support", name: "回転ミラー　小", stock: 1 },
+    { genre: "Support", name: "芝養生", stock: 10 },
+    { genre: "Support", name: "回転台", stock: 1 },
+    { genre: "Cart", name: "マグライナー", stock: 2 },
+    { genre: "Cart", name: "マグライナー用カゴ", stock: 1 },
+    { genre: "Cart", name: "イブライナー", stock: 2 },
+    { genre: "Cart", name: "ライトマグ", stock: 2 },
+    { genre: "Cart", name: "静キャリー", stock: 2 },
+    { genre: "Cart", name: "バタカート", stock: 2 },
+    { genre: "Cart", name: "コロ台車", stock: 6 },
+    { genre: "Cart", name: "折りたたみ台車", stock: 3 },
+    { genre: "Cart", name: "キャンピング台車", stock: 1 },
+    { genre: "Consumables", name: "消耗品セット", stock: 3 },
+    { genre: "Consumables", name: "テープセット　B", stock: 2 },
+    { genre: "Consumables", name: "テープセット　C", stock: 1 },
+    { genre: "Consumables", name: "3000クリスタル", stock: 0 },
+    { genre: "Consumables", name: "2200クリスタル", stock: 0 },
+    { genre: "Consumables", name: "1250クリスタル", stock: 0 },
+    { genre: "Consumables", name: "4000ビニール", stock: 0 },
+    { genre: "Consumables", name: "3000ビニール", stock: 0 },
+    { genre: "Consumables", name: "1800ビニール", stock: 0 },
+    { genre: "Consumables", name: "1250ビニール", stock: 0 },
+    { genre: "Consumables", name: "黒ビニール", stock: 0 },
+    { genre: "Consumables", name: "グレービニール", stock: 0 },
+    { genre: "Consumables", name: "白ビニール", stock: 0 },
+    { genre: "Consumables", name: "4×8 カポック", stock: 0 },
+    { genre: "Consumables", name: "3×6 カポック", stock: 0 },
+    { genre: "Consumables", name: "3×3 カポック", stock: 0 },
+    { genre: "Consumables", name: "1250トレス", stock: 0 },
+    { genre: "Consumables", name: "2200トレス", stock: 0 },
+    { genre: "Consumables", name: "ポリシャイン", stock: 0 },
+    { genre: "Consumables", name: "カブセール", stock: 0 },
+    { genre: "Ladder", name: "脚立12尺", stock: 1 },
+    { genre: "Ladder", name: "脚立9尺", stock: 1 },
+    { genre: "Ladder", name: "脚立7尺", stock: 2 },
+    { genre: "Ladder", name: "脚立6尺", stock: 2 },
+    { genre: "Ladder", name: "脚立4尺", stock: 2 },
+    { genre: "Ladder", name: "脚立用靴下セット", stock: 16 }
+];
     
-  
+   
+
+// ジャンル名ごとに色を保持するオブジェクト
+const genreColors = {};
+// 背景色として使うパステルカラーのリスト
+const palette = [
+    "#e3f2fd", "#f1f8e9", "#fff3e0", "#f3e5f5", "#e0f2f1", 
+    "#fff9c4", "#ffecb3", "#d1c4e9", "#c8e6c9", "#b3e5fc"
+];
+let colorIndex = 0;
 
 const tableBody = document.getElementById('tableBody');
 
 masterData.forEach((item, index) => {
     const tr = document.createElement('tr');
     tr.dataset.stock = item.stock;
+
+    // 未登録のジャンルなら新しい色を割り当て
+    if (!genreColors[item.genre]) {
+        genreColors[item.genre] = palette[colorIndex % palette.length];
+        colorIndex++;
+    }
+
     tr.innerHTML = `
-        <td class="col-name">${item.name}</td>
+        <td class="col-name" style="background-color: ${genreColors[item.genre]}">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
         <td class="bg-guide"><input type="number" class="shoot-0" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
         <td><input type="number" class="shoot-1" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
@@ -243,21 +512,14 @@ function calculateRow(rowIndex) {
     const inputs = row.querySelectorAll('input[type="number"]');
     const stock = parseInt(row.dataset.stock);
     const remainCell = document.getElementById(`remain-${rowIndex}`);
-
     let totalUsed = 0;
-    inputs.forEach(input => {
-        totalUsed += parseInt(input.value) || 0;
-    });
-
+    inputs.forEach(input => { totalUsed += parseInt(input.value) || 0; });
     const currentRemain = stock - totalUsed;
     remainCell.innerText = currentRemain;
-
     if (currentRemain < 0) {
-        remainCell.style.backgroundColor = "#ff0000"; 
-        remainCell.style.color = "#ffffff";
+        remainCell.style.backgroundColor = "#ff0000"; remainCell.style.color = "#ffffff";
     } else {
-        remainCell.style.backgroundColor = "#fffafa";
-        remainCell.style.color = "#d32f2f";
+        remainCell.style.backgroundColor = "#fffafa"; remainCell.style.color = "#d32f2f";
     }
 }
 
@@ -270,9 +532,5 @@ function resetColumn(colIndex) {
     });
 }
 </script>
-
 </body>
 </html>
-
-
-
