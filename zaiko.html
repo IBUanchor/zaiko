@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材員数管理 (プロ仕様)</title>
+    <title>機材員数管理 (ヘッダー自動復元版)</title>
     <style>
         * { box-sizing: border-box; font-family: sans-serif; touch-action: manipulation; }
         html, body { margin: 0; padding: 0; width: 100%; background-color: #fff; }
 
-        /* ヘッダー固定設定 */
         .share-container {
             padding: 10px; background: #f8f9fa; text-align: center;
             border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 201;
@@ -20,10 +19,9 @@
 
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 
-        /* 黒いバーの固定 */
         thead th {
             position: sticky; top: 60px; z-index: 200;
-            background-color: #000; color: #fff; height: 140px;
+            background-color: #000; color: #fff; height: 145px;
         }
 
         .header-input {
@@ -32,6 +30,8 @@
             text-align: center; outline: none; border-radius: 4px;
             writing-mode: vertical-rl; text-orientation: upright; display: block; margin: 0 auto 5px;
         }
+        /* 入力中だけ少し色を変える */
+        .header-input:focus { background: #555; border-color: #28a745; }
 
         .reset-btn {
             display: block; margin: 0 auto; padding: 4px 0; width: 85%;
@@ -43,7 +43,7 @@
         .w-shoot { width: 10.8%; }
 
         td { padding: 0; text-align: center; border-bottom: 1px solid #ddd; }
-        .col-name { font-size: 12px; font-weight: bold; padding-left: 6px; text-align: left !important; overflow: hidden; }
+        .col-name { font-size: 12px; font-weight: bold; padding-left: 6px; text-align: left !important; }
         .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
 
         .input-cell {
@@ -54,7 +54,6 @@
         .bg-guide { background-color: rgba(0,0,0,0.03); }
         .active-cell { background-color: #bbdefb !important; color: #000 !important; border: 2px solid #007bff; }
 
-        /* テンキーのレイアウト修正 */
         #numpad {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: #444; padding: 15px; display: none;
@@ -71,7 +70,7 @@
         
         .btn-10s { background: #ffd54f; } 
         .btn-clear { background: #ff8a65; color: #fff; } 
-        .btn-close { background: #78909c; color: #fff; } /* 決定ボタンを他と同じサイズに */
+        .btn-close { background: #78909c; color: #fff; }
 
         .bottom-spacer { height: 400px; }
     </style>
@@ -87,11 +86,14 @@
         <tr>
             <th class="w-name">機材名</th>
             <th class="w-remain">残</th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影１"><button class="reset-btn" onclick="resetColumn(0)">消</button></th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影２"><button class="reset-btn" onclick="resetColumn(1)">消</button></th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影３"><button class="reset-btn" onclick="resetColumn(2)">消</button></th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影４"><button class="reset-btn" onclick="resetColumn(3)">消</button></th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影５"><button class="reset-btn" onclick="resetColumn(4)">消</button></th>
+            ${[1,2,3,4,5].map((n, i) => `
+                <th class="w-shoot">
+                    <input type="text" class="header-input" value="撮影${n}" 
+                           onfocus="headerFocus(this)" 
+                           onblur="headerBlur(this)">
+                    <button class="reset-btn" onclick="resetColumn(${i})">消</button>
+                </th>
+            `).join('')}
         </tr>
     </thead>
     <tbody id="tableBody"></tbody>
@@ -101,6 +103,20 @@
 <div id="numpad"></div>
 
 <script>
+// --- ヘッダー操作用変数 ---
+let originalHeaderValue = "";
+
+function headerFocus(el) {
+    originalHeaderValue = el.value; // 元の文字を記憶
+    el.value = ""; // 入力されたら即座に消去
+}
+
+function headerBlur(el) {
+    if (el.value.trim() === "") {
+        el.value = originalHeaderValue; // 空っぽなら記憶していた文字を復活
+    }
+}
+
 // --- 機材データ ---
 const masterData = [
     { genre: "ARRI HMI", name: "9kw MAX", stock: 2 },
@@ -112,7 +128,6 @@ const masterData = [
     { genre: "ARRI HMI", name: "1.2kw CP", stock: 2 },
     { genre: "ARRI HMI", name: "800w MAX", stock: 4 },
     { genre: "ARRI HMI", name: "200w PAR", stock: 2 },
-    { genre: "ARRI HMI", name: "200w CP", stock: 0 },
     { genre: "LED(Flat)", name: "Skypanel S360C", stock: 2 },
     { genre: "LED(Flat)", name: "Skypanel S60C", stock: 8 },
     { genre: "Grip", name: "ジョーズクランプ", stock: 27 },
@@ -151,7 +166,6 @@ function openNumpad(el) {
     currentTarget.classList.add('active-cell');
     isFirstTap = true;
 
-    // テンキーに隠れないよう、タップした要素を画面中央付近へスクロール
     const rect = el.getBoundingClientRect();
     const offset = window.pageYOffset + rect.top - (window.innerHeight / 3);
     window.scrollTo({ top: offset, behavior: 'smooth' });
@@ -163,45 +177,40 @@ function openNumpad(el) {
 
 function renderNumpad(stock) {
     numpad.innerHTML = '';
+    const finalizeAndClose = () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); };
 
     if (stock <= 10) {
-        // 在庫10以下の時：1から順に並べ、最後にCと決定を配置
         for (let i = 1; i <= stock; i++) {
             addBtn(i, () => { currentTarget.innerText = i; finalizeInput(); });
         }
+        // 足りないマスを埋めてCと決定を配置
+        while(numpad.children.length % 4 !== 2) addEmpty();
         addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
-        addBtn("決定", () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); }, "btn-close");
+        addBtn("決定", finalizeAndClose, "btn-close");
     } else {
-        // 在庫10超の時：3列に数字、4列目に特殊ボタンを配置
-        // 1 2 3 | +10
-        // 4 5 6 | (空)
-        // 7 8 9 | C
-        // (空)  | 決定
+        // 在庫10超のレイアウト
         for (let i = 1; i <= 9; i++) {
             addBtn(i, () => appendNumber(i));
             if (i === 3) addBtn("+10", () => appendNumber(10), "btn-10s");
-            if (i === 6) addBtn("", () => {}, "num-btn-empty"); // 調整用空ボタン
+            if (i === 6) addEmpty();
             if (i === 9) addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
         }
-        // 最後の行の右下に決定
-        addBtn("", () => {}, "num-btn-empty"); 
-        addBtn("", () => {}, "num-btn-empty"); 
-        addBtn("", () => {}, "num-btn-empty"); 
-        addBtn("決定", () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); }, "btn-close");
+        addEmpty(); addEmpty(); addEmpty();
+        addBtn("決定", finalizeAndClose, "btn-close");
     }
 }
 
 function addBtn(text, action, extraClass = "") {
-    if (text === "" && extraClass === "num-btn-empty") {
-        const div = document.createElement('div');
-        numpad.appendChild(div);
-        return;
-    }
     const btn = document.createElement('button');
     btn.className = `num-btn ${extraClass}`;
     btn.innerText = text;
     btn.onclick = action;
     numpad.appendChild(btn);
+}
+
+function addEmpty() {
+    const div = document.createElement('div');
+    numpad.appendChild(div);
 }
 
 function appendNumber(num) {
