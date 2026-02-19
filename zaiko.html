@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材員数管理 (ヘッダー安定版)</title>
+    <title>機材員数管理 (完全リセット版)</title>
     <style>
         * { box-sizing: border-box; font-family: sans-serif; touch-action: manipulation; }
         html, body { margin: 0; padding: 0; width: 100%; background-color: #fff; }
 
-        /* 上部エリア固定 */
         .share-container {
             padding: 10px; background: #f8f9fa; text-align: center;
             border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 300;
@@ -20,14 +19,12 @@
 
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 
-        /* ヘッダー(黒いバー)の固定 */
         thead th {
             position: sticky; top: 60px; z-index: 250;
             background-color: #000; color: #fff; height: 160px;
             vertical-align: top; padding-top: 10px;
         }
 
-        /* ヘッダー入力欄の安定化 */
         .header-wrap {
             display: flex; flex-direction: column; align-items: center; width: 100%;
         }
@@ -38,7 +35,7 @@
             text-align: center; outline: none; border-radius: 4px;
             writing-mode: vertical-rl; text-orientation: upright;
             display: block; margin-bottom: 8px;
-            -webkit-appearance: none; /* iOS対策 */
+            -webkit-appearance: none;
         }
         .header-input:focus { background: #555; border-color: #28a745; }
 
@@ -47,10 +44,9 @@
             font-size: 10px; background: #e74c3c; color: #fff; border: none; border-radius: 4px;
         }
 
-        /* 列幅の指定 */
         .w-name { width: 34%; }
         .w-remain { width: 12%; }
-        .w-shoot { width: 10.8%; min-width: 40px; } /* 最小幅を固定 */
+        .w-shoot { width: 10.8%; min-width: 40px; }
 
         td { padding: 0; text-align: center; border-bottom: 1px solid #ddd; }
         .col-name { font-size: 12px; font-weight: bold; padding-left: 6px; text-align: left !important; overflow: hidden; white-space: nowrap; }
@@ -64,7 +60,6 @@
         .bg-guide { background-color: rgba(0,0,0,0.03); }
         .active-cell { background-color: #bbdefb !important; color: #000 !important; border: 2px solid #007bff; }
 
-        /* テンキー */
         #numpad {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: #444; padding: 15px; display: none;
@@ -103,6 +98,7 @@
                         <th class="w-shoot">
                             <div class="header-wrap">
                                 <input type="text" class="header-input" value="撮影${i}" 
+                                       data-default="撮影${i}"
                                        onfocus="headerFocus(this)" 
                                        onblur="headerBlur(this)">
                                 <button class="reset-btn" onclick="resetColumn(${i-1})">消</button>
@@ -133,7 +129,7 @@ function headerBlur(el) {
     }
 }
 
-// --- 機材データ (マスター) ---
+// --- 機材データ ---
 const masterData = [
     { genre: "ARRI HMI", name: "9kw MAX", stock: 2 },
     { genre: "ARRI HMI", name: "4kw MAX", stock: 2 },
@@ -256,11 +252,20 @@ function calculateRow(rowIndex) {
     remainCell.style.color = currentRemain < 0 ? "#ffffff" : "#d32f2f";
 }
 
+// 修正されたリセット機能
 function resetColumn(colIndex) {
-    if (!confirm(`列のデータをリセットしますか？`)) return;
+    if (!confirm(`この列（名前と員数）を初期状態にリセットしますか？`)) return;
+    
+    // 1. ヘッダー名の初期化
+    const headerInputs = document.querySelectorAll('.header-input');
+    const targetHeader = headerInputs[colIndex];
+    targetHeader.value = targetHeader.getAttribute('data-default');
+    
+    // 2. 員数の初期化
     document.querySelectorAll('#tableBody tr').forEach((row, rowIndex) => {
         const cell = row.querySelectorAll('.input-cell')[colIndex];
-        cell.innerText = 0; cell.classList.add('is-zero');
+        cell.innerText = 0; 
+        cell.classList.add('is-zero');
         calculateRow(rowIndex);
     });
 }
