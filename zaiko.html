@@ -49,8 +49,14 @@
         }
 
         .bg-guide { background-color: rgba(0,0,0,0.03); }
-        input:focus { background-color: #e8f0fe !important; }
-        .is-zero { color: #ccc !important; }
+        input:focus { 
+            background-color: #bbdefb !important;
+            color: #000 !important;
+            font-size:20px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        .is-zero{ color: #aaa !important; }
+        
         /* ヘッダーの入力枠のスタイル */
         .header-input {
             width: 35px;            /* 縦書きに見えるように幅を制限 */
@@ -566,6 +572,7 @@ function resetColumn(colIndex) {
 </script>
 </body>
 </html>
+
 
 
 
