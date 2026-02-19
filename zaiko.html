@@ -50,6 +50,7 @@
 
         .bg-guide { background-color: rgba(0,0,0,0.03); }
         input:focus { background-color: #e8f0fe !important; }
+        .is-zero { color: #ccc !important; }
     </style>
 </head>
 <body>
@@ -498,11 +499,11 @@ masterData.forEach((item, index) => {
     tr.innerHTML = `
         <td class="col-name" style="background-color: ${genreColors[item.genre]}">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
-        <td class="bg-guide"><input type="number" class="shoot-0" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td><input type="number" class="shoot-1" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td class="bg-guide"><input type="number" class="shoot-2" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td><input type="number" class="shoot-3" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td class="bg-guide"><input type="number" class="shoot-4" value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-0"　is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td><input type="number" class="shoot-1"　is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-2" is-zero　value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td><input type="number" class="shoot-3" is-zero　value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-4" is-zero　value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
     `;
     tableBody.appendChild(tr);
 });
@@ -510,6 +511,13 @@ masterData.forEach((item, index) => {
 function calculateRow(rowIndex) {
     const row = document.querySelectorAll('#tableBody tr')[rowIndex];
     const inputs = row.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        if (parseInt(input.value) > 0) {
+            input.classList.remove('is-zero');
+        } else {
+            input.classList.add('is-zero');
+        }
+    });
     const stock = parseInt(row.dataset.stock);
     const remainCell = document.getElementById(`remain-${rowIndex}`);
     let totalUsed = 0;
@@ -534,3 +542,4 @@ function resetColumn(colIndex) {
 </script>
 </body>
 </html>
+
