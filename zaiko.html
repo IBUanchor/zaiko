@@ -681,10 +681,14 @@ window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const d = params.get('d'), h = params.get('h');
     const headerInputs = document.querySelectorAll('.header-input');
+
+    // URLに名前データ(h)があれば読み込む
     if (h) {
         const names = h.split(',');
         headerInputs.forEach((input, i) => { if(names[i]) input.value = decodeURIComponent(names[i]); });
     }
+
+    // URLに員数データ(d)があれば読み込む
     if (d) {
         const vals = d.split(','), rows = document.querySelectorAll('#tableBody tr');
         let idx = 0;
@@ -692,15 +696,22 @@ window.onload = function() {
             row.querySelectorAll('.input-cell').forEach(cell => {
                 const v = vals[idx++] || 0;
                 cell.innerText = v;
-                if (v > 0) cell.classList.remove('is-zero');
+                // 0より大きければ色を戻す、0なら薄くする
+                if (parseInt(v) > 0) cell.classList.remove('is-zero');
+                else cell.classList.add('is-zero');
             });
-            calculateRow(rIdx);
+            calculateRow(rIdx); // 合計・残数を再計算
         });
+    } else {
+        // URLにデータがない場合、念のため全行を計算して初期状態(0)を確定させる
+        masterData.forEach((_, i) => calculateRow(i));
     }
 };
+
 </script>
 </body>
 </html>
+
 
 
 
