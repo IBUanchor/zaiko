@@ -58,8 +58,9 @@
         }
         .is-zero { color: #aaa; }
         .bg-guide { background-color: rgba(0,0,0,0.03); }
-        .active-cell { background-color: #bbdefb !important; color: #000 !important; border: 2px solid #007bff; }
-
+        .active-cell { background-color: #bbdefb !important; color: #000 !important; border: 2px solid #007bff; }      
+        
+        
         #numpad {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: #444; padding: 15px; display: none;
@@ -572,28 +573,33 @@ function openNumpad(el) {
     numpad.style.display = 'grid';
 }
 
+
 function renderNumpad(stock) {
     numpad.innerHTML = '';
     const finalizeAndClose = () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); };
 
-    if (stock <= 10) {
-        for (let i = 1; i <= stock; i++) {
-            addBtn(i, () => { currentTarget.innerText = i; finalizeInput(); });
-        }
-        while(numpad.children.length % 4 !== 2) addEmpty();
-        addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
-        addBtn("決定", finalizeAndClose, "btn-close");
-    } else {
-        for (let i = 1; i <= 9; i++) {
-            addBtn(i, () => appendNumber(i));
-            if (i === 3) addBtn("+10", () => appendNumber(10), "btn-10s");
-            if (i === 6) addEmpty();
-            if (i === 9) addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
-        }
-        addEmpty(); addEmpty(); addEmpty();
-        addBtn("決定", finalizeAndClose, "btn-close");
+    // 1. 在庫数に応じて 1〜9 までのボタンを表示
+    const maxNumBtn = Math.min(stock, 9);
+    for (let i = 1; i <= maxNumBtn; i++) {
+        addBtn(i, () => {
+            // 在庫9以下の場合は上書き、10以上の場合は合算
+            if (stock <= 9) { currentTarget.innerText = i; finalizeInput(); }
+            else { appendNumber(i); }
+        });
     }
+
+    // 2. 在庫が10以上なら「+10」ボタンを追加
+    if (stock >= 10) {
+        addBtn("+10", () => appendNumber(10), "btn-10s");
+    }
+
+    // 3. 常に「C」ボタンを追加
+    addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
+
+    // 4. 常に「決定」ボタンを追加
+    addBtn("決定", finalizeAndClose, "btn-close");
 }
+
 
 function addBtn(text, action, extraClass = "") {
     const btn = document.createElement('button');
@@ -688,5 +694,6 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
