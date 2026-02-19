@@ -49,7 +49,7 @@
         .w-shoot { width: 10.8%; min-width: 40px; }
 
         td { padding: 0; text-align: center; border-bottom: 1px solid #ddd; }
-        .col-name { font-size: 12px; font-weight: bold; padding-left: 6px; text-align: left !important; overflow: hidden; white-space: nowrap; }
+        .col-name { font-size: 12px; font-weight: bold; padding-left: 6px; text-align: left !important; overflow: hidden; display: table-cell; vertical-align: middle; word-break: break-all; line-height: 1.1;}
         .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
 
         .input-cell {
@@ -84,7 +84,7 @@
 <body>
 
 <div class="share-container">
-    <button class="share-btn" onclick="generateShareLink()">今の状態をLINEで共有する</button>
+    <button class="share-btn" onclick="generateShareLink()">共有する</button>
 </div>
 
 <table>
@@ -452,8 +452,8 @@ const masterData = [
     { genre: "Generator", name: "2.6ｋw", stock: 2 },
     { genre: "Generator", name: "並列用ケーブルセット", stock: 1 },
     { genre: "Generator", name: "1.8ｋw", stock: 1 },
-    { genre: "Generator", name: "予備タンク (20?)", stock: 2 },
-    { genre: "Generator", name: "予備タンク (10?)", stock: 1 },
+    { genre: "Generator", name: "予備タンク (20L)", stock: 2 },
+    { genre: "Generator", name: "予備タンク (10L)", stock: 1 },
     { genre: "Pole", name: "オートポールジョイント(2ｍ)", stock: 24 },
     { genre: "Pole", name: "オートポールジョイント(1.5ｍ)", stock: 7 },
     { genre: "Pole", name: "オートポールジョイント(1ｍ)", stock: 11 },
@@ -688,4 +688,5 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
