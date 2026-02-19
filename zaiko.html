@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材員数管理 (シンプルテンキー版)</title>
+    <title>機材員数管理 (プロ仕様)</title>
     <style>
         * { box-sizing: border-box; font-family: sans-serif; touch-action: manipulation; }
-        html, body { margin: 0; padding: 0; width: 100%; background-color: #fff; overflow-x: hidden; }
+        html, body { margin: 0; padding: 0; width: 100%; background-color: #fff; }
 
+        /* ヘッダー固定設定 */
         .share-container {
             padding: 10px; background: #f8f9fa; text-align: center;
-            border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 200;
+            border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 201;
         }
         .share-btn {
             padding: 12px 24px; background: #28a745; color: white; border: none;
@@ -19,8 +20,9 @@
 
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 
+        /* 黒いバーの固定 */
         thead th {
-            position: sticky; top: 60px; z-index: 100;
+            position: sticky; top: 60px; z-index: 200;
             background-color: #000; color: #fff; height: 140px;
         }
 
@@ -46,14 +48,13 @@
 
         .input-cell {
             width: 100%; height: 60px; font-size: 18px; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
         .is-zero { color: #aaa; }
         .bg-guide { background-color: rgba(0,0,0,0.03); }
         .active-cell { background-color: #bbdefb !important; color: #000 !important; border: 2px solid #007bff; }
 
-        /* カスタムテンキー (3列または4列で大きく) */
+        /* テンキーのレイアウト修正 */
         #numpad {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: #444; padding: 15px; display: none;
@@ -68,11 +69,11 @@
         }
         .num-btn:active { background: #ddd; transform: translateY(2px); box-shadow: none; }
         
-        .btn-10s { background: #ffd54f; grid-column: span 1; } /* +10ボタン */
-        .btn-clear { background: #ff8a65; color: #fff; } /* Cボタン */
-        .btn-close { background: #78909c; color: #fff; grid-column: span 4; height: 45px; font-size: 16px; margin-top: 5px; }
+        .btn-10s { background: #ffd54f; } 
+        .btn-clear { background: #ff8a65; color: #fff; } 
+        .btn-close { background: #78909c; color: #fff; } /* 決定ボタンを他と同じサイズに */
 
-        .bottom-spacer { height: 350px; }
+        .bottom-spacer { height: 400px; }
     </style>
 </head>
 <body>
@@ -150,6 +151,11 @@ function openNumpad(el) {
     currentTarget.classList.add('active-cell');
     isFirstTap = true;
 
+    // テンキーに隠れないよう、タップした要素を画面中央付近へスクロール
+    const rect = el.getBoundingClientRect();
+    const offset = window.pageYOffset + rect.top - (window.innerHeight / 3);
+    window.scrollTo({ top: offset, behavior: 'smooth' });
+
     const stock = parseInt(masterData[el.dataset.row].stock);
     renderNumpad(stock);
     numpad.style.display = 'grid';
@@ -159,30 +165,38 @@ function renderNumpad(stock) {
     numpad.innerHTML = '';
 
     if (stock <= 10) {
-        // 在庫10以下なら必要な数だけボタンを出す (0は除外)
+        // 在庫10以下の時：1から順に並べ、最後にCと決定を配置
         for (let i = 1; i <= stock; i++) {
             addBtn(i, () => { currentTarget.innerText = i; finalizeInput(); });
         }
+        addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
+        addBtn("決定", () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); }, "btn-close");
     } else {
-        // 在庫10超なら 1-9 ボタン
+        // 在庫10超の時：3列に数字、4列目に特殊ボタンを配置
+        // 1 2 3 | +10
+        // 4 5 6 | (空)
+        // 7 8 9 | C
+        // (空)  | 決定
         for (let i = 1; i <= 9; i++) {
             addBtn(i, () => appendNumber(i));
+            if (i === 3) addBtn("+10", () => appendNumber(10), "btn-10s");
+            if (i === 6) addBtn("", () => {}, "num-btn-empty"); // 調整用空ボタン
+            if (i === 9) addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
         }
-        // +10 ボタン (黄色)
-        addBtn("+10", () => appendNumber(10), "btn-10s");
+        // 最後の行の右下に決定
+        addBtn("", () => {}, "num-btn-empty"); 
+        addBtn("", () => {}, "num-btn-empty"); 
+        addBtn("", () => {}, "num-btn-empty"); 
+        addBtn("決定", () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); }, "btn-close");
     }
-
-    // クリアボタン（全機材共通）
-    addBtn("C", () => { currentTarget.innerText = 0; isFirstTap = true; finalizeInput(); }, "btn-clear");
-
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'num-btn btn-close';
-    closeBtn.innerText = '決定';
-    closeBtn.onclick = () => { numpad.style.display = 'none'; currentTarget.classList.remove('active-cell'); };
-    numpad.appendChild(closeBtn);
 }
 
 function addBtn(text, action, extraClass = "") {
+    if (text === "" && extraClass === "num-btn-empty") {
+        const div = document.createElement('div');
+        numpad.appendChild(div);
+        return;
+    }
     const btn = document.createElement('button');
     btn.className = `num-btn ${extraClass}`;
     btn.innerText = text;
@@ -192,17 +206,10 @@ function addBtn(text, action, extraClass = "") {
 
 function appendNumber(num) {
     let currentVal = parseInt(currentTarget.innerText) || 0;
-    
-    if (isFirstTap) {
-        currentVal = num;
-        isFirstTap = false;
-    } else {
-        currentVal += num;
-    }
-
+    if (isFirstTap) { currentVal = num; isFirstTap = false; } 
+    else { currentVal += num; }
     const stock = parseInt(masterData[currentTarget.dataset.row].stock);
     if (currentVal > stock) currentVal = stock;
-
     currentTarget.innerText = currentVal;
     finalizeInput();
 }
