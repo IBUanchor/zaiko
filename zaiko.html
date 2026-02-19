@@ -51,6 +51,24 @@
         .bg-guide { background-color: rgba(0,0,0,0.03); }
         input:focus { background-color: #e8f0fe !important; }
         .is-zero { color: #ccc !important; }
+        /* ヘッダーの入力枠のスタイル */
+        .header-input {
+            width: 20px;            /* 縦書きに見えるように幅を制限 */
+            background: transparent;
+            color: #fff;
+            border: 1px solid #555; /* 入力できることがわかるよう薄く枠線 */
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.1;
+            word-break: break-all;  /* 自動で改行させて縦書きに見せる */
+            outline: none;
+            padding: 2px 0;
+        }
+        .header-input:focus {
+            background: #333;       /* タップした時に少し明るく */
+            border-color: #fff;
+}
     </style>
 </head>
 <body>
@@ -60,11 +78,11 @@
         <tr>
             <th class="w-name">機材名</th>
             <th class="w-remain">残</th>
-            <th class="w-shoot"><span class="v-text-box">撮影１</span><button class="reset-btn" onclick="resetColumn(0)">C</button></th>
-            <th class="w-shoot"><span class="v-text-box">撮影２</span><button class="reset-btn" onclick="resetColumn(1)">C</button></th>
-            <th class="w-shoot"><span class="v-text-box">撮影３</span><button class="reset-btn" onclick="resetColumn(2)">C</button></th>
-            <th class="w-shoot"><span class="v-text-box">撮影４</span><button class="reset-btn" onclick="resetColumn(3)">C</button></th>
-            <th class="w-shoot"><span class="v-text-box">撮影５</span><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影１"><button class="reset-btn" onclick="resetColumn(0)">C</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影２"><button class="reset-btn" onclick="resetColumn(1)">C</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影３"><button class="reset-btn" onclick="resetColumn(2)">C</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影４"><button class="reset-btn" onclick="resetColumn(3)">C</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影５"><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
         </tr>
     </thead>
     <tbody id="tableBody"></tbody>
@@ -532,6 +550,7 @@ function calculateRow(rowIndex) {
 }
 
 function resetColumn(colIndex) {
+    const colName = document.querySelectorAll('.header-input')[colIndex].value;
     if(!confirm(`撮影${colIndex + 1}をリセット？`)) return;
     const inputs = document.querySelectorAll(`.shoot-${colIndex}`);
     inputs.forEach((input, rowIndex) => {
@@ -542,6 +561,7 @@ function resetColumn(colIndex) {
 </script>
 </body>
 </html>
+
 
 
 
