@@ -3,104 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>機材管理</title>
+    <title>機材員数管理システム</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-        }
+        * { box-sizing: border-box; font-family: sans-serif; }
+        html, body { margin: 0; padding: 0; width: 100%; background-color: #fff; }
 
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow-x: hidden; background-color: #fff; }
+        /* 共有ボタンエリア */
+        .share-container {
+            padding: 10px;
+            background: #f8f9fa;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+        .share-btn {
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 
+        /* ヘッダー設定 */
         thead th {
-            position: sticky; top: 0; z-index: 100;
+            position: sticky; top: 60px; z-index: 100;
             background-color: #000; color: #fff;
-            height: 120px; padding: 0; vertical-align: middle; border: none;
+            height: 140px; padding: 5px 0; vertical-align: middle;
         }
 
-        .v-text-box { display: inline-block; font-size: 14px; line-height: 1.1; width: 1em; font-weight: bold; }
+        .header-input {
+            width: 35px; height: 90px;
+            background: #333; color: #fff;
+            border: 1px solid #777; font-size: 16px; font-weight: bold;
+            text-align: center; outline: none; border-radius: 4px;
+            writing-mode: vertical-rl; text-orientation: upright;
+            display: block; margin: 0 auto 5px;
+        }
+        .header-input:focus { background-color: #fff !important; color: #000 !important; }
 
         .reset-btn {
-            display: block; margin: 8px auto 0; padding: 5px 0; width: 85%;
+            display: block; margin: 0 auto; padding: 4px 0; width: 85%;
             font-size: 11px; background: #e74c3c; color: #fff;
             border: none; border-radius: 4px; font-weight: bold;
         }
 
-        .w-name   { width: 34%; }
+        .w-name { width: 34%; }
         .w-remain { width: 12%; }
-        .w-shoot  { width: 10.8%; }
+        .w-shoot { width: 10.8%; }
 
         td { padding: 0; text-align: center; vertical-align: middle; border-bottom: 1px solid #ddd; }
 
         .col-name {
-            font-size: 10px; font-weight: bold; color: #000;
-            text-align: left !important; padding-left: 6px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-size: 12px; font-weight: bold; padding-left: 6px;
+            text-align: left !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
+        /* 状態別スタイル */
         .col-remain { font-size: 18px; font-weight: 900; color: #d32f2f; background-color: #fffafa; }
+        .is-zero { color: #aaa !important; }
 
         input[type="number"] {
-            width: 100%; height: 60px; font-size: 18px; font-weight: bold;
+            width: 100%; height: 60px; font-size: 16px; font-weight: bold;
             text-align: center; border: none; background-color: transparent;
-            outline: none; display: block; -webkit-appearance: none; color: #000;
+            outline: none; display: block; -webkit-appearance: none;
+        }
+        input:focus {
+            background-color: #bbdefb !important;
+            color: #000 !important;
+            font-size: 20px;
         }
 
         .bg-guide { background-color: rgba(0,0,0,0.03); }
-        input:focus { 
-            background-color: #bbdefb !important;
-            color: #000 !important;
-            font-size:20px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-        }
-        .is-zero{ color: #ccc !important; }
-        
-        /* ヘッダーの入力枠のスタイル */
-        .header-input {
-            width: 35px;            /* 縦書きに見えるように幅を制限 */
-            height:80px;
-            background: #333;
-            color: #fff;
-            border: 1px solid #777; /* 入力できることがわかるよう薄く枠線 */
-            font-size: 16px;
-            font-weight: bold;
-            text-align: center;
-            outline: none;
-            padding: 2px 0;
-            border-radius: 4px;
-            /* 確実に縦書きにする設定 */
-            writing-mode: vertical-rl; 
-            text-orientation: upright;
-            display: block;
-            margin: 0 auto;
-        }
-        .header-input:focus {
-            background: #444;       /* タップした時に少し明るく */
-            border-color: #ffff;
-}
     </style>
 </head>
 <body>
+
+<div class="share-container">
+    <button class="share-btn" onclick="generateShareLink()">今の状態をLINEで共有する</button>
+</div>
 
 <table>
     <thead>
         <tr>
             <th class="w-name">機材名</th>
             <th class="w-remain">残</th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影１"><button class="reset-btn" onclick="resetColumn(0)">C</button></th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影２"><button class="reset-btn" onclick="resetColumn(1)">C</button></th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影３"><button class="reset-btn" onclick="resetColumn(2)">C</button></th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影４"><button class="reset-btn" onclick="resetColumn(3)">C</button></th>
-            <th class="w-shoot"><input type="text" class="header-input" value="撮影５"><button class="reset-btn" onclick="resetColumn(4)">C</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影１"><button class="reset-btn" onclick="resetColumn(0)">消</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影２"><button class="reset-btn" onclick="resetColumn(1)">消</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影３"><button class="reset-btn" onclick="resetColumn(2)">消</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影４"><button class="reset-btn" onclick="resetColumn(3)">消</button></th>
+            <th class="w-shoot"><input type="text" class="header-input" value="撮影５"><button class="reset-btn" onclick="resetColumn(4)">消</button></th>
         </tr>
     </thead>
     <tbody id="tableBody"></tbody>
 </table>
 
 <script>
-// ジャンル付きマスターデータ（例として一部作成。ここに全データを流し込んでください）
+// --- 機材データ (省略なしフルセット) ---
 const masterData = [
     { genre: "ARRI HMI", name: "9kw MAX", stock: 2 },
     { genre: "ARRI HMI", name: "4kw MAX", stock: 2 },
@@ -268,8 +273,6 @@ const masterData = [
     { genre: "Butterfly", name: "分解　9×9", stock: 2 },
     { genre: "Butterfly", name: "分解　6×9", stock: 2 },
     { genre: "Butterfly", name: "分解　6×6", stock: 1 },
-    { genre: "Butterfly", name: "ストレート　20×20", stock: 0 },
-    { genre: "Butterfly", name: "ストレート　20×10", stock: 0 },
     { genre: "Butterfly", name: "ストレート　12×12", stock: 2 },
     { genre: "Butterfly", name: "ストレート　12×9", stock: 2 },
     { genre: "Butterfly", name: "ストレート　9×9", stock: 2 },
@@ -312,20 +315,9 @@ const masterData = [
     { genre: "Cloth", name: "4×8パンツ (G/B)", stock: 2 },
     { genre: "Cloth", name: "3×6パンツ (G/B)", stock: 2 },
     { genre: "Cloth", name: "3×6ボード (G/B)", stock: 1 },
-    { genre: "Cloth", name: "サウスシーパンチ (m)", stock: 0 },
-    { genre: "Cloth", name: "グリーンパンチ (m)", stock: 0 },
-    { genre: "Cloth", name: "ブルーパンチ (m)", stock: 0 },
-    { genre: "Cloth", name: "黒パンチ (m)", stock: 0 },
     { genre: "Cloth", name: "黒8尺7m (BT)", stock: 2 },
     { genre: "Cloth", name: "Yブラック", stock: 4 },
     { genre: "Cloth", name: "3m×6m (ベージュ)", stock: 1 },
-    { genre: "Cloth", name: "黒シーツ (6m)", stock: 0 },
-    { genre: "Cloth", name: "黒シーツ (4ｍ)", stock: 0 },
-    { genre: "Cloth", name: "グレーシーツ (6ｍ)", stock: 0 },
-    { genre: "Cloth", name: "グレーシーツ (4ｍ)", stock: 0 },
-    { genre: "Cloth", name: "白シーツ (6ｍ)", stock: 0 },
-    { genre: "Cloth", name: "白シーツ (4ｍ)", stock: 0 },
-    { genre: "Cloth", name: "ベージュシーツ (1m)", stock: 0 },
     { genre: "Cloth", name: "シーツセット A", stock: 2 },
     { genre: "Cloth", name: "シーツセット B", stock: 2 },
     { genre: "Grip", name: "ジョーズクランプ", stock: 27 },
@@ -392,7 +384,6 @@ const masterData = [
     { genre: "Stands", name: "センチュリーカーゴ(6本)", stock: 1 },
     { genre: "Stands", name: "センチュリーカーゴ(4本)", stock: 1 },
     { genre: "Stands", name: "テニスボール", stock: 6 },
-    { genre: "Stands", name: "スタンド用靴下セット", stock: 0 },
     { genre: "Boom", name: "メナスアーム", stock: 2 },
     { genre: "Boom", name: "メナスアームウエイト", stock: 2 },
     { genre: "Boom", name: "メガブーム", stock: 4 },
@@ -402,7 +393,6 @@ const masterData = [
     { genre: "Electric", name: "38φケーブル (10m)", stock: 12 },
     { genre: "Electric", name: "スパイダーボックス", stock: 3 },
     { genre: "Electric", name: "Y型プラグ", stock: 3 },
-    { genre: "Electric", name: "取り出しカムロック", stock: 0 },
     { genre: "Electric", name: "60Aケーブル", stock: 13 },
     { genre: "Electric", name: "30Aケーブル", stock: 18 },
     { genre: "Electric", name: "100A→60A分岐", stock: 2 },
@@ -412,7 +402,6 @@ const masterData = [
     { genre: "Electric", name: "30Aボックスタップ", stock: 6 },
     { genre: "Electric", name: "ACタップコード", stock: 47 },
     { genre: "Electric", name: "ドラムコード", stock: 4 },
-    { genre: "Electric", name: "6口ACタップ", stock: 0 },
     { genre: "Electric", name: "ケーブルマット", stock: 4 },
     { genre: "Electric", name: "30スクリュー→30メス", stock: 2 },
     { genre: "Electric", name: "60スクリュー→60メス", stock: 1 },
@@ -430,24 +419,13 @@ const masterData = [
     { genre: "Pole", name: "オートポールコーナー", stock: 12 },
     { genre: "Pole", name: "オートポール 大", stock: 4 },
     { genre: "Pole", name: "オートポール 小", stock: 2 },
-    { genre: "Pole", name: "鉄管パイプ　4m", stock: 0 },
-    { genre: "Pole", name: "鉄管パイプ　3m", stock: 0 },
-    { genre: "Pole", name: "鉄管パイプ　2m", stock: 0 },
-    { genre: "Pole", name: "鉄管パイプ　1m", stock: 0 },
     { genre: "Pole", name: "ライトパイプ", stock: 4 },
     { genre: "Support", name: "インカム", stock: 11 },
     { genre: "Support", name: "Solidcom　C1Pro", stock: 4 },
     { genre: "Support", name: "ウエイト", stock: 40 },
     { genre: "Support", name: "ウエイト （New）", stock: 40 },
     { genre: "Support", name: "ボサセット", stock: 3 },
-    { genre: "Support", name: "アップルボックスセット", stock: 0 },
-    { genre: "Support", name: "アップルボックスフル", stock: 0 },
-    { genre: "Support", name: "アップルボックスハーフ", stock: 0 },
-    { genre: "Support", name: "アップルボックスクォーター", stock: 0 },
-    { genre: "Support", name: "グリップマット", stock: 0 },
     { genre: "Support", name: "ザイルロープ (黒)", stock: 20 },
-    { genre: "Support", name: "ザイルロープ細 (青)", stock: 0 },
-    { genre: "Support", name: "細引き", stock: 0 },
     { genre: "Support", name: "フィルターバック", stock: 3 },
     { genre: "Support", name: "フィルターロールバック", stock: 1 },
     { genre: "Support", name: "白テント", stock: 1 },
@@ -458,8 +436,6 @@ const masterData = [
     { genre: "Support", name: "巻き尺 (20ｍ)", stock: 2 },
     { genre: "Support", name: "磁石セット", stock: 3 },
     { genre: "Support", name: "Antari", stock: 1 },
-    { genre: "Support", name: "VIPPER", stock: 0 },
-    { genre: "Support", name: "イントレ (段)", stock: 0 },
     { genre: "Support", name: "ハンドブロアー", stock: 2 },
     { genre: "Support", name: "回転ミラー  大", stock: 1 },
     { genre: "Support", name: "回転ミラー　小", stock: 1 },
@@ -477,23 +453,6 @@ const masterData = [
     { genre: "Consumables", name: "消耗品セット", stock: 3 },
     { genre: "Consumables", name: "テープセット　B", stock: 2 },
     { genre: "Consumables", name: "テープセット　C", stock: 1 },
-    { genre: "Consumables", name: "3000クリスタル", stock: 0 },
-    { genre: "Consumables", name: "2200クリスタル", stock: 0 },
-    { genre: "Consumables", name: "1250クリスタル", stock: 0 },
-    { genre: "Consumables", name: "4000ビニール", stock: 0 },
-    { genre: "Consumables", name: "3000ビニール", stock: 0 },
-    { genre: "Consumables", name: "1800ビニール", stock: 0 },
-    { genre: "Consumables", name: "1250ビニール", stock: 0 },
-    { genre: "Consumables", name: "黒ビニール", stock: 0 },
-    { genre: "Consumables", name: "グレービニール", stock: 0 },
-    { genre: "Consumables", name: "白ビニール", stock: 0 },
-    { genre: "Consumables", name: "4×8 カポック", stock: 0 },
-    { genre: "Consumables", name: "3×6 カポック", stock: 0 },
-    { genre: "Consumables", name: "3×3 カポック", stock: 0 },
-    { genre: "Consumables", name: "1250トレス", stock: 0 },
-    { genre: "Consumables", name: "2200トレス", stock: 0 },
-    { genre: "Consumables", name: "ポリシャイン", stock: 0 },
-    { genre: "Consumables", name: "カブセール", stock: 0 },
     { genre: "Ladder", name: "脚立12尺", stock: 1 },
     { genre: "Ladder", name: "脚立9尺", stock: 1 },
     { genre: "Ladder", name: "脚立7尺", stock: 2 },
@@ -501,95 +460,105 @@ const masterData = [
     { genre: "Ladder", name: "脚立4尺", stock: 2 },
     { genre: "Ladder", name: "脚立用靴下セット", stock: 16 }
 ];
-    
-   
 
-// ジャンル名ごとに色を保持するオブジェクト
+const palette = ["#e3f2fd", "#f1f8e9", "#fff3e0", "#f3e5f5", "#e0f2f1", "#fff9c4", "#ffecb3", "#d1c4e9", "#c8e6c9", "#b3e5fc"];
 const genreColors = {};
-// 背景色として使うパステルカラーのリスト
-const palette = [
-    "#e3f2fd", "#f1f8e9", "#fff3e0", "#f3e5f5", "#e0f2f1", 
-    "#fff9c4", "#ffecb3", "#d1c4e9", "#c8e6c9", "#b3e5fc"
-];
-let colorIndex = 0;
+let colorIdx = 0;
 
 const tableBody = document.getElementById('tableBody');
 
+// テーブル生成
 masterData.forEach((item, index) => {
+    if (!genreColors[item.genre]) {
+        genreColors[item.genre] = palette[colorIdx % palette.length];
+        colorIdx++;
+    }
     const tr = document.createElement('tr');
     tr.dataset.stock = item.stock;
-
-    // 未登録のジャンルなら新しい色を割り当て
-    if (!genreColors[item.genre]) {
-        genreColors[item.genre] = palette[colorIndex % palette.length];
-        colorIndex++;
-    }
-
     tr.innerHTML = `
-        <td class="col-name" style="background-color: ${genreColors[item.genre]}">${item.name}</td>
+        <td class="col-name" style="background-color:${genreColors[item.genre]}">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
-        <td class="bg-guide"><input type="number" class="shoot-0"　is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td><input type="number" class="shoot-1" is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td class="bg-guide"><input type="number" class="shoot-2" is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td><input type="number" class="shoot-3" is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td class="bg-guide"><input type="number" class="shoot-4" is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-0 is-zero" value="0" oninput="calculateRow(${index})"></td>
+        <td><input type="number" class="shoot-1 is-zero" value="0" oninput="calculateRow(${index})"></td>
+        <td class="bg-guide"><input type="number" class="shoot-2 is-zero" value="0" oninput="calculateRow(${index})"></td>
+        <td><input type="number" class="shoot-3 is-zero" value="0" oninput="calculateRow(${index})"></td>
+        <td class="bg-guide"><input type="number" class="shoot-4 is-zero" value="0" oninput="calculateRow(${index})"></td>
     `;
     tableBody.appendChild(tr);
 });
 
+// 在庫計算
 function calculateRow(rowIndex) {
     const row = document.querySelectorAll('#tableBody tr')[rowIndex];
     const inputs = row.querySelectorAll('input[type="number"]');
-    inputs.forEach(input => {
-        if (parseInt(input.value) > 0) {
-            input.classList.remove('is-zero');
-        } else {
-            input.classList.add('is-zero');
-        }
-    });
-    const stock = parseInt(row.dataset.stock);
     const remainCell = document.getElementById(`remain-${rowIndex}`);
     let totalUsed = 0;
-    inputs.forEach(input => { totalUsed += parseInt(input.value) || 0; });
-    const currentRemain = stock - totalUsed;
+
+    inputs.forEach(input => {
+        const val = parseInt(input.value) || 0;
+        totalUsed += val;
+        if (val > 0) input.classList.remove('is-zero');
+        else input.classList.add('is-zero');
+    });
+
+    const currentRemain = parseInt(row.dataset.stock) - totalUsed;
     remainCell.innerText = currentRemain;
-    if (currentRemain < 0) {
-        remainCell.style.backgroundColor = "#ff0000"; remainCell.style.color = "#ffffff";
-    } else {
-        remainCell.style.backgroundColor = "#fffafa"; remainCell.style.color = "#d32f2f";
-    }
+    remainCell.style.backgroundColor = currentRemain < 0 ? "#ff0000" : "#fffafa";
+    remainCell.style.color = currentRemain < 0 ? "#ffffff" : "#d32f2f";
 }
 
+// リセット機能
 function resetColumn(colIndex) {
-    // 現在のヘッダー名を取得
     const headerInputs = document.querySelectorAll('.header-input');
-    const currentName = headerInputs[colIndex].value;
+    if (!confirm(`${headerInputs[colIndex].value} のデータをリセットしますか？`)) return;
     
-    // 確認ダイアログ
-    if(!confirm(`${currentName} の全データと名前をリセットしますか？`)) return;
-    
-    // 1. ヘッダー名を元の「撮影x」に戻す
     headerInputs[colIndex].value = `撮影${colIndex + 1}`;
-    
-    // 2. その列の数値をすべて0に戻す
-    const inputs = document.querySelectorAll(`.shoot-${colIndex}`);
-    inputs.forEach((input, rowIndex) => {
+    document.querySelectorAll('#tableBody tr').forEach((row, rowIndex) => {
+        const input = row.querySelectorAll('input[type="number"]')[colIndex];
         input.value = 0;
-        // 数値が0になったのでグレーにする（is-zeroクラスの適用）
-        input.classList.add('is-zero');
-        // 在庫の再計算を実行
         calculateRow(rowIndex);
     });
 }
+
+// 共有リンク生成
+function generateShareLink() {
+    const allValues = [];
+    document.querySelectorAll('#tableBody tr input[type="number"]').forEach(input => allValues.push(input.value));
+    const headerNames = Array.from(document.querySelectorAll('.header-input')).map(i => encodeURIComponent(i.value));
+    
+    const baseUrl = window.location.href.split('?')[0];
+    const shareUrl = `${baseUrl}?h=${headerNames.join(',')}&d=${allValues.join(',')}`;
+
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        alert("共有URLをコピーしました！LINEに貼り付けて送ってください。");
+    }).catch(() => {
+        prompt("以下のURLをコピーして送ってください：", shareUrl);
+    });
+}
+
+// URLからのデータ復元
+window.onload = function() {
+    const params = new URLSearchParams(window.location.search);
+    const d = params.get('d');
+    const h = params.get('h');
+
+    if (h) {
+        const names = h.split(',');
+        document.querySelectorAll('.header-input').forEach((input, i) => { if(names[i]) input.value = decodeURIComponent(names[i]); });
+    }
+
+    if (d) {
+        const vals = d.split(',');
+        let idx = 0;
+        document.querySelectorAll('#tableBody tr').forEach((row, rowIndex) => {
+            row.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = vals[idx] || 0;
+                idx++;
+            });
+            calculateRow(rowIndex);
+        });
+    }
+};
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
