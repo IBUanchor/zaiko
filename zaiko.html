@@ -500,10 +500,10 @@ masterData.forEach((item, index) => {
         <td class="col-name" style="background-color: ${genreColors[item.genre]}">${item.name}</td>
         <td class="col-remain" id="remain-${index}">${item.stock}</td>
         <td class="bg-guide"><input type="number" class="shoot-0"　is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td><input type="number" class="shoot-1"　is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td class="bg-guide"><input type="number" class="shoot-2" is-zero　value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td><input type="number" class="shoot-3" is-zero　value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
-        <td class="bg-guide"><input type="number" class="shoot-4" is-zero　value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td><input type="number" class="shoot-1" is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-2" is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td><input type="number" class="shoot-3" is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
+        <td class="bg-guide"><input type="number" class="shoot-4" is-zero value="0" oninput="calculateRow(${index})" onclick="this.select()"></td>
     `;
     tableBody.appendChild(tr);
 });
@@ -542,4 +542,5 @@ function resetColumn(colIndex) {
 </script>
 </body>
 </html>
+
 
