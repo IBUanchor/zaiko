@@ -561,7 +561,7 @@ masterData.forEach((item, index) => {
     if (item.genre !== lastGenre) {
         const gTr = document.createElement('tr');
         gTr.className = 'genre-row';
-        gTr.innerHTML = `<td colspan="7" onclick="toggleGenre('${item.genre}')">${item.genre}</td>`;
+        gTr.innerHTML = `<td colspan="7" onclick="toggleGenre('${item.genre}' event)">${item.genre}</td>`;
         tableBody.appendChild(gTr);
         lastGenre = item.genre;
     }
@@ -580,7 +580,7 @@ masterData.forEach((item, index) => {
 });
 
 // --- 関数定義 ---
-function toggleGenre(genre) {
+function toggleGenre(genre, event) {
     // 1. 今回タップされたジャンルの名前を整形
     const safeGenreName = genre.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
     const targetRows = document.querySelectorAll(`.genre-group-${safeGenreName}`);
@@ -778,6 +778,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
