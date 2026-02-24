@@ -590,7 +590,14 @@ function toggleGenre(genre) {
 }
 
 function headerFocus(el) { originalHeaderValue = el.value; el.value = ""; }
-function headerBlur(el) { if (el.value.trim() === "") el.value = originalHeaderValue; }
+function headerBlur(el) {
+    if (el.value.trim() === "") {
+    el.value = originalHeaderValue;
+    }else if(el.value !== originalHeaderValue){
+        updateTimestamp();
+    }
+}
+    
 
 function openNumpad(el) {
     if (currentTarget) currentTarget.classList.remove('active-cell');
@@ -678,6 +685,7 @@ function resetColumn(colIndex) {
         cell.innerText = 0; cell.classList.add('is-zero');
         calculateRow(rowIndex);
     });
+    updateTimestamp();
 }
 
 function generateShareLink() {
@@ -726,6 +734,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
