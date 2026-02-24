@@ -548,8 +548,7 @@ const masterData = [
     { genre: "Ladder", name: "脚立4尺", stock: 2 },
     { genre: "Ladder", name: "脚立用靴下セット", stock: 16 }
 ];
-
-
+    
 const palette = ["#e3f2fd", "#f1f8e9", "#fff3e0", "#f3e5f5", "#e0f2f1", "#fff9c4"];
 const genreColors = {};
 let colorIdx = 0;
@@ -571,7 +570,6 @@ masterData.forEach((item, index) => {
     if (item.genre !== lastGenre) {
         const gTr = document.createElement('tr');
         gTr.className = 'genre-row';
-        // ★修正：引数にカンマを追加
         gTr.innerHTML = `<td colspan="7" onclick="toggleGenre('${item.genre}', event)">${item.genre}</td>`;
         tableBody.appendChild(gTr);
         lastGenre = item.genre;
@@ -590,6 +588,8 @@ masterData.forEach((item, index) => {
 });
 
 // --- 関数定義 ---
+
+// 展開・縮小の制御
 function toggleGenre(genre, event) {
     const safeGenreName = genre.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
     const targetRows = document.querySelectorAll(`.genre-group-${safeGenreName}`);
@@ -695,7 +695,6 @@ function calculateRow(rowIndex) {
     const currentRemain = parseInt(row.dataset.stock) - totalUsed;
     remainCell.innerText = currentRemain;
 
-    // 個別の機材行のスタイル変更
     if (currentRemain < 0) {
         remainCell.style.backgroundColor = "#ff0000";
         remainCell.style.color = "#ffffff";
@@ -703,39 +702,12 @@ function calculateRow(rowIndex) {
         remainCell.style.backgroundColor = "#fffafa";
         remainCell.style.color = "#d32f2f";
     }
-
-    // --- ここから追加：ジャンルバーの警告判定 ---
-    // この機材が属するジャンルのクラス名を取得（例: genre-group-LED）
-    const genreClass = Array.from(row.classList).find(c => c.startsWith('genre-group-'));
-    if (genreClass) {
-        // 同じジャンルの全行を取得
-        const siblingRows = document.querySelectorAll(`.${genreClass}`);
-        let hasMinus = false;
-        siblingRows.forEach(r => {
-            const stock = parseInt(r.dataset.stock);
-            let used = 0;
-            r.querySelectorAll('.input-cell').forEach(c => used += parseInt(c.innerText) || 0);
-            if (stock - used < 0) hasMinus = true; // 一つでもマイナスがあればフラグを立てる
-        });
-
-        // ジャンル名が書かれたバー（genre-row）を探す
-        // genre-rowは通常、ジャンルグループの直前のtr要素です
-        let prevEl = targetRows[0].previousElementSibling;
-        while (prevEl && !prevEl.classList.contains('genre-row')) {
-            prevEl = prevEl.previousElementSibling;
-        }
-
-        // 判定ロジックをより確実に：
-        // 全てのジャンルバーをループして、対応する中身にマイナスがあるかチェックする汎用処理
-        updateGenreWarning();
-    }
 }
 
-// ジャンルバーの状態を一括更新する関数（確実な方法）
+// ジャンルバーの状態を一括更新する関数
 function updateGenreWarning() {
     const genreRows = document.querySelectorAll('.genre-row');
     genreRows.forEach(gRow => {
-        // ジャンルバーのテキスト（ジャンル名）を取得
         const genreName = gRow.innerText.replace(' ▼', '').replace(' ⚠️不足あり', '').trim();
         const safeName = genreName.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
         const items = document.querySelectorAll(`.genre-group-${safeName}`);
@@ -755,7 +727,6 @@ function updateGenreWarning() {
         }
     });
 }
-
 
 function resetColumn(colIndex) {
     if (!confirm(`この列を初期状態にリセットしますか？`)) return;
@@ -791,48 +762,8 @@ function updateTimestamp() {
     if(el) el.innerText = timeStr;
 }
 
-    // ジャンルバーの状態（赤くするかどうか）をチェックする関数
-function updateGenreWarning() {
-    // 全てのジャンルバー（黒い棒）を一つずつ確認
-    const genreRows = document.querySelectorAll('.genre-row');
-    
-    genreRows.forEach(gRow => {
-        // 表示されている文字から、余計な警告文字などを除外して純粋なジャンル名を取り出す
-        const genreName = gRow.innerText.replace(' ▼', '').replace(' ⚠️不足あり', '').trim();
-        // 記号などを消して検索用の名前に変換
-        const safeName = genreName.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
-        
-        // そのジャンルに属する全ての機材を取得
-        const items = document.querySelectorAll(`.genre-group-${safeName}`);
-        
-        let hasMinus = false;
-        items.forEach(item => {
-            const stock = parseInt(item.dataset.stock); // 元の在庫
-            let used = 0;
-            // 撮影1〜5の合計を計算
-            item.querySelectorAll('.input-cell').forEach(c => used += parseInt(c.innerText) || 0);
-            
-            // もし残数がマイナスなら「不足あり」フラグを立てる
-            if (stock - used < 0) {
-                hasMinus = true;
-            }
-        });
-
-        // マイナスがあれば赤く（has-errorクラス追加）、なければ戻す
-        if (hasMinus) {
-            gRow.classList.add('has-error');
-        } else {
-            gRow.classList.remove('has-error');
-        }
-    });
-}
-
-
-
-    
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
-    // ★修正：t を取得に追加
     const d = params.get('d'), h = params.get('h'), t = params.get('t');
     const headerInputs = document.querySelectorAll('.header-input');
 
@@ -852,7 +783,8 @@ window.onload = function() {
             calculateRow(rIdx);
         });
     } else {
-        masterData.forEach((_, i) => calculateRow(i));
+        const itemRows = document.querySelectorAll('#tableBody tr.item-row');
+        itemRows.forEach((_, i) => calculateRow(i));
     }
     
     if (t) {
@@ -862,9 +794,10 @@ window.onload = function() {
     }
     updateGenreWarning();
 };
-</script>
+</script>    
 </body>
 </html>
+
 
 
 
