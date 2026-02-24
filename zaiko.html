@@ -691,10 +691,21 @@ function resetColumn(colIndex) {
 function generateShareLink() {
     const allValues = [];
     document.querySelectorAll('.input-cell').forEach(cell => allValues.push(cell.innerText));
+    
     const headerInputs = document.querySelectorAll('.header-input');
     const headerNames = Array.from(headerInputs).map(i => encodeURIComponent(i.value));
-    const shareUrl = `${window.location.href.split('?')[0]}?h=${headerNames.join(',')}&d=${allValues.join(',')}`;
-    navigator.clipboard.writeText(shareUrl).then(() => alert("共有URLをコピーしました！")).catch(() => prompt("コピー：", shareUrl));
+    
+    // 現在表示されている最終更新の文字列を取得
+    const timeStr = encodeURIComponent(document.getElementById('last-update').innerText);
+
+    // URLに t=時刻データ を追加
+    const shareUrl = `${window.location.href.split('?')[0]}?h=${headerNames.join(',')}&d=${allValues.join(',')}&t=${timeStr}`;
+    
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        alert("共有URLをコピーしました！");
+    }).catch(() => {
+        prompt("コピー：", shareUrl);
+    });
 }
 
 function updateTimestamp() {
@@ -734,6 +745,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
