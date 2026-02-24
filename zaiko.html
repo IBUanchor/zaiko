@@ -42,14 +42,24 @@
             font-size: 14px; letter-spacing: 1px;
         }
         .genre-row.has-error {
-            background-color: #ff0000 !important; /* 不足があれば赤くする */
+            background-color: #222 !important;
             color: #fff !important;
+        }
+        .genre-row.has-error td {
+            position: relative;
         }
         .genre-row.has-error td::after {
             content: ' ⚠️不足あり ▼'; /* 警告文字を出す */
-            color: #ffff00;
-            font-size: 11px;
-            float: right;
+            position: absolute;
+            right: 15px; /* 残数表示の列に近い位置 */
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ff0000; /* ここだけ赤色 */
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
         }
 
         
@@ -797,6 +807,7 @@ window.onload = function() {
 </script>    
 </body>
 </html>
+
 
 
 
