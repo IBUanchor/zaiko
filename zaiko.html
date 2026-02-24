@@ -751,6 +751,20 @@ function resetColumn(colIndex) {
     updateGenreWarning();
 }
 
+// 再読み込み・ページ移動時に警告を出す
+window.onbeforeunload = function(e) {
+    // 何か入力されている場合のみ警告を出す（すべて0なら出さない）
+    const cells = document.querySelectorAll('.input-cell');
+    let hasData = false;
+    cells.forEach(cell => {
+        if (cell.innerText !== "0") hasData = true;
+    });
+
+    if (hasData) {
+        return "入力中のデータが破棄されます。よろしいですか？";
+    }
+};    
+
 function generateShareLink() {
     const allValues = [];
     document.querySelectorAll('.input-cell').forEach(cell => allValues.push(cell.innerText));
@@ -807,6 +821,7 @@ window.onload = function() {
 </script>    
 </body>
 </html>
+
 
 
 
