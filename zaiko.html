@@ -658,7 +658,15 @@ function calculateRow(rowIndex) {
     cells.forEach(cell => { totalUsed += parseInt(cell.innerText) || 0; });
     const currentRemain = parseInt(row.dataset.stock) - totalUsed;
     remainCell.innerText = currentRemain;
-    remainCell.style.color = currentRemain < 0 ? "#ff0000" : "#d32f2f";
+    if (currentRemain < 0) {
+        // マイナスの場合：背景赤、文字白
+        remainCell.style.backgroundColor = "#ff0000";
+        remainCell.style.color = "#ffffff";
+    } else {
+        // 0以上の場合：背景白（または薄い赤）、文字濃い赤
+        remainCell.style.backgroundColor = "#fffafa";
+        remainCell.style.color = "#d32f2f";
+    }
 }
 
 function resetColumn(colIndex) {
@@ -718,6 +726,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
