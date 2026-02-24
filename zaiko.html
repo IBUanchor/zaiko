@@ -536,14 +536,6 @@ const masterData = [
 
 
 
-
-
-
-
-
-
-
-
 const palette = ["#e3f2fd", "#f1f8e9", "#fff3e0", "#f3e5f5", "#e0f2f1", "#fff9c4"];
 const genreColors = {};
 let colorIdx = 0;
@@ -554,7 +546,7 @@ let originalHeaderValue = "";
 const tableBody = document.getElementById('tableBody');
 const numpad = document.getElementById('numpad');
 
-// --- テーブル生成 (アコーディオン対応) ---
+// --- テーブル生成実行 ---
 let lastGenre = "";
 masterData.forEach((item, index) => {
     if (!genreColors[item.genre]) {
@@ -566,7 +558,6 @@ masterData.forEach((item, index) => {
     if (item.genre !== lastGenre) {
         const gTr = document.createElement('tr');
         gTr.className = 'genre-row';
-        // 引数をシングルクォートで囲み、スペースがあっても渡せるように修正
         gTr.innerHTML = `<td colspan="7" onclick="toggleGenre('${item.genre}')">${item.genre}</td>`;
         tableBody.appendChild(gTr);
         lastGenre = item.genre;
@@ -574,16 +565,20 @@ masterData.forEach((item, index) => {
 
     // 機材行の生成
     const tr = document.createElement('tr');
-    // クラス名からスペースを消して、有効なIDにする
-    const safeGenreName = item.genre.replace(/\s+/g, '');
+    const safeGenreName = item.genre.replace(/\s+/g, ''); // スペース対策
     tr.className = `item-row genre-group-${safeGenreName}`;
+    tr.dataset.stock = item.stock;
+    tr.innerHTML = `
+        <td class="col-name" style="background-color:${genreColors[item.genre]}">${item.name}</td>
+        <td class="col-remain" id="remain-${index}">${item.stock}</td>
+        ${[0,1,2,3,4].map(c => `<td class="${c%2===0?'bg-guide':''}"><div class="input-cell is-zero" data-row="${index}" data-col="${c}" onclick="openNumpad(this)">0</div></td>`).join('')}
+    `;
+    tableBody.appendChild(tr);
+});
 
-
-
-   
+// --- 関数定義 ---
 
 function toggleGenre(genre) {
-    // 渡された名前からもスペースを消して検索
     const safeGenreName = genre.replace(/\s+/g, '');
     const rows = document.querySelectorAll(`.genre-group-${safeGenreName}`);
     rows.forEach(row => {
@@ -650,7 +645,8 @@ function finalizeInput() {
 }
 
 function calculateRow(rowIndex) {
-    const row = document.querySelectorAll('#tableBody tr.item-row')[rowIndex]; // item-rowのみを対象にする
+    const itemRows = document.querySelectorAll('#tableBody tr.item-row');
+    const row = itemRows[rowIndex];
     if(!row) return;
     const cells = row.querySelectorAll('.input-cell');
     const remainCell = document.getElementById(`remain-${rowIndex}`);
@@ -707,6 +703,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
