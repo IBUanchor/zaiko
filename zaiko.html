@@ -41,6 +41,18 @@
             padding: 15px 10px; font-weight: bold; text-align: left !important;
             font-size: 14px; letter-spacing: 1px;
         }
+        .genre-row.has-error {
+            background-color: #ff0000 !important; /* 不足があれば赤くする */
+            color: #fff !important;
+        }
+        .genre-row.has-error td::after {
+            content: ' ⚠️不足あり ▼'; /* 警告文字を出す */
+            color: #ffff00;
+            font-size: 11px;
+            float: right;
+        }
+
+        
         .genre-row td::after { content: ' ▼'; font-size: 10px; float: right; color: #aaa; }
 
         /* 機材行（子）- 初期は非表示 */
@@ -667,18 +679,23 @@ function finalizeInput() {
     else currentTarget.classList.add('is-zero');
     calculateRow(currentTarget.dataset.row);
     updateTimestamp();
+    updateGenreWarning();
 }
 
 function calculateRow(rowIndex) {
     const itemRows = document.querySelectorAll('#tableBody tr.item-row');
     const row = itemRows[rowIndex];
     if(!row) return;
+    
     const cells = row.querySelectorAll('.input-cell');
     const remainCell = document.getElementById(`remain-${rowIndex}`);
     let totalUsed = 0;
     cells.forEach(cell => { totalUsed += parseInt(cell.innerText) || 0; });
+    
     const currentRemain = parseInt(row.dataset.stock) - totalUsed;
     remainCell.innerText = currentRemain;
+
+    // 個別の機材行のスタイル変更
     if (currentRemain < 0) {
         remainCell.style.backgroundColor = "#ff0000";
         remainCell.style.color = "#ffffff";
@@ -686,7 +703,59 @@ function calculateRow(rowIndex) {
         remainCell.style.backgroundColor = "#fffafa";
         remainCell.style.color = "#d32f2f";
     }
+
+    // --- ここから追加：ジャンルバーの警告判定 ---
+    // この機材が属するジャンルのクラス名を取得（例: genre-group-LED）
+    const genreClass = Array.from(row.classList).find(c => c.startsWith('genre-group-'));
+    if (genreClass) {
+        // 同じジャンルの全行を取得
+        const siblingRows = document.querySelectorAll(`.${genreClass}`);
+        let hasMinus = false;
+        siblingRows.forEach(r => {
+            const stock = parseInt(r.dataset.stock);
+            let used = 0;
+            r.querySelectorAll('.input-cell').forEach(c => used += parseInt(c.innerText) || 0);
+            if (stock - used < 0) hasMinus = true; // 一つでもマイナスがあればフラグを立てる
+        });
+
+        // ジャンル名が書かれたバー（genre-row）を探す
+        // genre-rowは通常、ジャンルグループの直前のtr要素です
+        let prevEl = targetRows[0].previousElementSibling;
+        while (prevEl && !prevEl.classList.contains('genre-row')) {
+            prevEl = prevEl.previousElementSibling;
+        }
+
+        // 判定ロジックをより確実に：
+        // 全てのジャンルバーをループして、対応する中身にマイナスがあるかチェックする汎用処理
+        updateGenreWarning();
+    }
 }
+
+// ジャンルバーの状態を一括更新する関数（確実な方法）
+function updateGenreWarning() {
+    const genreRows = document.querySelectorAll('.genre-row');
+    genreRows.forEach(gRow => {
+        // ジャンルバーのテキスト（ジャンル名）を取得
+        const genreName = gRow.innerText.replace(' ▼', '').replace(' ⚠️不足あり', '').trim();
+        const safeName = genreName.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
+        const items = document.querySelectorAll(`.genre-group-${safeName}`);
+        
+        let hasMinus = false;
+        items.forEach(item => {
+            const stock = parseInt(item.dataset.stock);
+            let used = 0;
+            item.querySelectorAll('.input-cell').forEach(c => used += parseInt(c.innerText) || 0);
+            if (stock - used < 0) hasMinus = true;
+        });
+
+        if (hasMinus) {
+            gRow.classList.add('has-error');
+        } else {
+            gRow.classList.remove('has-error');
+        }
+    });
+}
+
 
 function resetColumn(colIndex) {
     if (!confirm(`この列を初期状態にリセットしますか？`)) return;
@@ -698,6 +767,7 @@ function resetColumn(colIndex) {
         calculateRow(rowIndex);
     });
     updateTimestamp();
+    updateGenreWarning();
 }
 
 function generateShareLink() {
@@ -721,6 +791,45 @@ function updateTimestamp() {
     if(el) el.innerText = timeStr;
 }
 
+    // ジャンルバーの状態（赤くするかどうか）をチェックする関数
+function updateGenreWarning() {
+    // 全てのジャンルバー（黒い棒）を一つずつ確認
+    const genreRows = document.querySelectorAll('.genre-row');
+    
+    genreRows.forEach(gRow => {
+        // 表示されている文字から、余計な警告文字などを除外して純粋なジャンル名を取り出す
+        const genreName = gRow.innerText.replace(' ▼', '').replace(' ⚠️不足あり', '').trim();
+        // 記号などを消して検索用の名前に変換
+        const safeName = genreName.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
+        
+        // そのジャンルに属する全ての機材を取得
+        const items = document.querySelectorAll(`.genre-group-${safeName}`);
+        
+        let hasMinus = false;
+        items.forEach(item => {
+            const stock = parseInt(item.dataset.stock); // 元の在庫
+            let used = 0;
+            // 撮影1〜5の合計を計算
+            item.querySelectorAll('.input-cell').forEach(c => used += parseInt(c.innerText) || 0);
+            
+            // もし残数がマイナスなら「不足あり」フラグを立てる
+            if (stock - used < 0) {
+                hasMinus = true;
+            }
+        });
+
+        // マイナスがあれば赤く（has-errorクラス追加）、なければ戻す
+        if (hasMinus) {
+            gRow.classList.add('has-error');
+        } else {
+            gRow.classList.remove('has-error');
+        }
+    });
+}
+
+
+
+    
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     // ★修正：t を取得に追加
@@ -751,10 +860,12 @@ window.onload = function() {
     } else {
         updateTimestamp();
     }
+    updateGenreWarning();
 };
 </script>
 </body>
 </html>
+
 
 
 
