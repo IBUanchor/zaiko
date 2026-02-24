@@ -566,10 +566,19 @@ masterData.forEach((item, index) => {
     if (item.genre !== lastGenre) {
         const gTr = document.createElement('tr');
         gTr.className = 'genre-row';
+        // 引数をシングルクォートで囲み、スペースがあっても渡せるように修正
         gTr.innerHTML = `<td colspan="7" onclick="toggleGenre('${item.genre}')">${item.genre}</td>`;
         tableBody.appendChild(gTr);
         lastGenre = item.genre;
     }
+
+    // 機材行の生成
+    const tr = document.createElement('tr');
+    // クラス名からスペースを消して、有効なIDにする
+    const safeGenreName = item.genre.replace(/\s+/g, '');
+    tr.className = `item-row genre-group-${safeGenreName}`;
+
+
 
     // 機材行の生成
     const tr = document.createElement('tr');
@@ -584,7 +593,9 @@ masterData.forEach((item, index) => {
 });
 
 function toggleGenre(genre) {
-    const rows = document.querySelectorAll(`.genre-group-${genre}`);
+    // 渡された名前からもスペースを消して検索
+    const safeGenreName = genre.replace(/\s+/g, '');
+    const rows = document.querySelectorAll(`.genre-group-${safeGenreName}`);
     rows.forEach(row => {
         row.style.display = (row.style.display === 'table-row') ? 'none' : 'table-row';
     });
@@ -706,4 +717,5 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
