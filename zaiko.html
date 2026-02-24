@@ -93,7 +93,7 @@
             box-shadow: 0 3px 0 #bbb;
         }
         .num-btn:active { background: #ddd; transform: translateY(2px); box-shadow: none; }
-        .btn-10s { background: #ffd54f; } 
+        .btn-10s { background: #fff; } 
         .btn-clear { background: #ff8a65; color: #fff; } 
         .btn-close { background: #78909c; color: #fff; }
 
@@ -102,9 +102,12 @@
 </head>
 <body>
 
-<div class="share-container">
-    <button class="share-btn" onclick="generateShareLink()">今の状態をLINEで共有する</button>
-</div>
+<div class="share-container" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+    <div id="last-update" style="font-size: 12px; color: #333; font-weight: bold; background: #eee; padding: 5px 8px; border-radius: 4px;">
+        最終更新 --/-- --:--
+    </div>
+    <button class="share-btn" onclick="generateShareLink()">共有する</button>
+</div>    
 
 <table>
     <thead>
@@ -642,6 +645,7 @@ function finalizeInput() {
     if (val > 0) currentTarget.classList.remove('is-zero');
     else currentTarget.classList.add('is-zero');
     calculateRow(currentTarget.dataset.row);
+    updateTimestamp();
 }
 
 function calculateRow(rowIndex) {
@@ -677,6 +681,17 @@ function generateShareLink() {
     navigator.clipboard.writeText(shareUrl).then(() => alert("共有URLをコピーしました！")).catch(() => prompt("コピー：", shareUrl));
 }
 
+function updateTimestamp() {
+    const now = new Date();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+    const h = now.getHours();
+    const min = now.getMinutes().toString().padStart(2, '0'); // 分を2桁に固定
+    
+    const timeStr = `最終更新 ${m}/${d} ${h}:${min}`;
+    document.getElementById('last-update').innerText = timeStr;
+}
+    
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const d = params.get('d'), h = params.get('h');
@@ -703,6 +718,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
