@@ -538,7 +538,6 @@ const masterData = [
 ];
 
 
-
 const palette = ["#e3f2fd", "#f1f8e9", "#fff3e0", "#f3e5f5", "#e0f2f1", "#fff9c4"];
 const genreColors = {};
 let colorIdx = 0;
@@ -557,16 +556,15 @@ masterData.forEach((item, index) => {
         colorIdx++;
     }
 
-    // ジャンル行の挿入
     if (item.genre !== lastGenre) {
         const gTr = document.createElement('tr');
         gTr.className = 'genre-row';
-        gTr.innerHTML = `<td colspan="7" onclick="toggleGenre('${item.genre}' event)">${item.genre}</td>`;
+        // ★修正：引数にカンマを追加
+        gTr.innerHTML = `<td colspan="7" onclick="toggleGenre('${item.genre}', event)">${item.genre}</td>`;
         tableBody.appendChild(gTr);
         lastGenre = item.genre;
     }
 
-    // 機材行の生成
     const tr = document.createElement('tr');
     const safeGenreName = item.genre.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
     tr.className = `item-row genre-group-${safeGenreName}`;
@@ -581,51 +579,39 @@ masterData.forEach((item, index) => {
 
 // --- 関数定義 ---
 function toggleGenre(genre, event) {
-    // 1. 今回タップされたジャンルの名前を整形
     const safeGenreName = genre.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
     const targetRows = document.querySelectorAll(`.genre-group-${safeGenreName}`);
-    
-    // 現在の状態を確認
     const isOpening = targetRows.length > 0 && targetRows[0].style.display === 'table-row';
 
-    // 2. すべての機材行を一括で閉じる
     document.querySelectorAll('.item-row').forEach(row => {
         row.style.display = 'none';
     });
 
-    // 3. 閉じていた場合は展開し、その場所までスクロール
     if (!isOpening) {
         targetRows.forEach(row => {
             row.style.display = 'table-row';
         });
 
-        // タップした要素（ジャンル行）を取得して、その位置までスクロール
-        // event.currentTarget を使うために、HTML側の引数に event を追加する必要があります
         const clickedEl = event.currentTarget;
-        
-        // ヘッダー（共有ボタン＋黒ヘッダー）の高さ分を考慮して位置を調整
-        // 共有エリア(約60px) + 黒ヘッダー(約160px) = 220px 程度
         const headerOffset = 220; 
         const elementPosition = clickedEl.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
         window.scrollTo({
             top: offsetPosition,
-            behavior: "smooth" // スルスルと動かす
+            behavior: "smooth"
         });
     }
 }
-    
 
 function headerFocus(el) { originalHeaderValue = el.value; el.value = ""; }
 function headerBlur(el) {
     if (el.value.trim() === "") {
-    el.value = originalHeaderValue;
-    }else if(el.value !== originalHeaderValue){
+        el.value = originalHeaderValue;
+    } else if (el.value !== originalHeaderValue) {
         updateTimestamp();
     }
 }
-    
 
 function openNumpad(el) {
     if (currentTarget) currentTarget.classList.remove('active-cell');
@@ -694,11 +680,9 @@ function calculateRow(rowIndex) {
     const currentRemain = parseInt(row.dataset.stock) - totalUsed;
     remainCell.innerText = currentRemain;
     if (currentRemain < 0) {
-        // マイナスの場合：背景赤、文字白
         remainCell.style.backgroundColor = "#ff0000";
         remainCell.style.color = "#ffffff";
     } else {
-        // 0以上の場合：背景白（または薄い赤）、文字濃い赤
         remainCell.style.backgroundColor = "#fffafa";
         remainCell.style.color = "#d32f2f";
     }
@@ -719,21 +703,11 @@ function resetColumn(colIndex) {
 function generateShareLink() {
     const allValues = [];
     document.querySelectorAll('.input-cell').forEach(cell => allValues.push(cell.innerText));
-    
     const headerInputs = document.querySelectorAll('.header-input');
     const headerNames = Array.from(headerInputs).map(i => encodeURIComponent(i.value));
-    
-    // 現在表示されている最終更新の文字列を取得
     const timeStr = encodeURIComponent(document.getElementById('last-update').innerText);
-
-    // URLに t=時刻データ を追加
     const shareUrl = `${window.location.href.split('?')[0]}?h=${headerNames.join(',')}&d=${allValues.join(',')}&t=${timeStr}`;
-    
-    navigator.clipboard.writeText(shareUrl).then(() => {
-        alert("共有URLをコピーしました！");
-    }).catch(() => {
-        prompt("コピー：", shareUrl);
-    });
+    navigator.clipboard.writeText(shareUrl).then(() => { alert("共有URLをコピーしました！"); }).catch(() => { prompt("コピー：", shareUrl); });
 }
 
 function updateTimestamp() {
@@ -741,16 +715,18 @@ function updateTimestamp() {
     const m = now.getMonth() + 1;
     const d = now.getDate();
     const h = now.getHours();
-    const min = now.getMinutes().toString().padStart(2, '0'); // 分を2桁に固定
-    
+    const min = now.getMinutes().toString().padStart(2, '0');
     const timeStr = `最終更新 ${m}/${d} ${h}:${min}`;
-    document.getElementById('last-update').innerText = timeStr;
+    const el = document.getElementById('last-update');
+    if(el) el.innerText = timeStr;
 }
-    
+
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
-    const d = params.get('d'), h = params.get('h');
+    // ★修正：t を取得に追加
+    const d = params.get('d'), h = params.get('h'), t = params.get('t');
     const headerInputs = document.querySelectorAll('.header-input');
+
     if (h) {
         const names = h.split(',');
         headerInputs.forEach((input, i) => { if(names[i]) input.value = decodeURIComponent(names[i]); });
@@ -769,15 +745,17 @@ window.onload = function() {
     } else {
         masterData.forEach((_, i) => calculateRow(i));
     }
+    
     if (t) {
         document.getElementById('last-update').innerText = decodeURIComponent(t);
     } else {
-        updateTimestamp(); // データがない場合は「今」を表示
+        updateTimestamp();
     }
 };
 </script>
 </body>
 </html>
+
 
 
 
