@@ -750,21 +750,6 @@ function resetColumn(colIndex) {
     updateTimestamp();
     updateGenreWarning();
 }
-
-// 再読み込み・ページ移動時に警告を出す
-window.onbeforeunload = function(e) {
-    // 何か入力されている場合のみ警告を出す（すべて0なら出さない）
-    const cells = document.querySelectorAll('.input-cell');
-    let hasData = false;
-    cells.forEach(cell => {
-        if (cell.innerText !== "0") hasData = true;
-    });
-
-    if (hasData) {
-        return "入力中のデータが破棄されます。よろしいですか？";
-    }
-};    
-
 function generateShareLink() {
     const allValues = [];
     document.querySelectorAll('.input-cell').forEach(cell => allValues.push(cell.innerText));
@@ -785,7 +770,23 @@ function updateTimestamp() {
     const el = document.getElementById('last-update');
     if(el) el.innerText = timeStr;
 }
+// 再読み込み・ページ移動時に警告を出す
+window.addEventListener('beforeunload', function (e) {
+    // 画面上のどこかの数字が「0」以外になっているかチェック
+    const allCells = document.querySelectorAll('.input-cell');
+    let isChanged = false;
+    allCells.forEach(cell => {
+        if (cell.innerText !== "0") isChanged = true;
+    });
 
+    // 数字が入力されている場合のみ、ブラウザ標準の警告を出す
+    if (isChanged) {
+        // 最近のブラウザでは、以下の2行を書くことで警告が有効になります
+        e.preventDefault();
+        e.returnValue = ''; 
+    }
+});
+    
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const d = params.get('d'), h = params.get('h'), t = params.get('t');
@@ -821,6 +822,7 @@ window.onload = function() {
 </script>    
 </body>
 </html>
+
 
 
 
