@@ -580,14 +580,42 @@ masterData.forEach((item, index) => {
 });
 
 // --- 関数定義 ---
-
 function toggleGenre(genre) {
+    // 1. 今回タップされたジャンルの名前を整形
     const safeGenreName = genre.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
-    const rows = document.querySelectorAll(`.genre-group-${safeGenreName}`);
-    rows.forEach(row => {
-        row.style.display = (row.style.display === 'table-row') ? 'none' : 'table-row';
+    const targetRows = document.querySelectorAll(`.genre-group-${safeGenreName}`);
+    
+    // 現在の状態を確認
+    const isOpening = targetRows.length > 0 && targetRows[0].style.display === 'table-row';
+
+    // 2. すべての機材行を一括で閉じる
+    document.querySelectorAll('.item-row').forEach(row => {
+        row.style.display = 'none';
     });
+
+    // 3. 閉じていた場合は展開し、その場所までスクロール
+    if (!isOpening) {
+        targetRows.forEach(row => {
+            row.style.display = 'table-row';
+        });
+
+        // タップした要素（ジャンル行）を取得して、その位置までスクロール
+        // event.currentTarget を使うために、HTML側の引数に event を追加する必要があります
+        const clickedEl = event.currentTarget;
+        
+        // ヘッダー（共有ボタン＋黒ヘッダー）の高さ分を考慮して位置を調整
+        // 共有エリア(約60px) + 黒ヘッダー(約160px) = 220px 程度
+        const headerOffset = 220; 
+        const elementPosition = clickedEl.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth" // スルスルと動かす
+        });
+    }
 }
+    
 
 function headerFocus(el) { originalHeaderValue = el.value; el.value = ""; }
 function headerBlur(el) {
@@ -741,10 +769,16 @@ window.onload = function() {
     } else {
         masterData.forEach((_, i) => calculateRow(i));
     }
+    if (t) {
+        document.getElementById('last-update').innerText = decodeURIComponent(t);
+    } else {
+        updateTimestamp(); // データがない場合は「今」を表示
+    }
 };
 </script>
 </body>
 </html>
+
 
 
 
