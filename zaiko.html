@@ -565,7 +565,7 @@ masterData.forEach((item, index) => {
 
     // 機材行の生成
     const tr = document.createElement('tr');
-    const safeGenreName = item.genre.replace(/\s+/g, ''); // スペース対策
+    const safeGenreName = item.genre.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
     tr.className = `item-row genre-group-${safeGenreName}`;
     tr.dataset.stock = item.stock;
     tr.innerHTML = `
@@ -579,7 +579,7 @@ masterData.forEach((item, index) => {
 // --- 関数定義 ---
 
 function toggleGenre(genre) {
-    const safeGenreName = genre.replace(/\s+/g, '');
+    const safeGenreName = genre.replace(/[^\w\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/g, '');
     const rows = document.querySelectorAll(`.genre-group-${safeGenreName}`);
     rows.forEach(row => {
         row.style.display = (row.style.display === 'table-row') ? 'none' : 'table-row';
@@ -703,6 +703,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
