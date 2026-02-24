@@ -580,17 +580,7 @@ masterData.forEach((item, index) => {
 
 
 
-    // 機材行の生成
-    const tr = document.createElement('tr');
-    tr.className = `item-row genre-group-${item.genre}`;
-    tr.dataset.stock = item.stock;
-    tr.innerHTML = `
-        <td class="col-name" style="background-color:${genreColors[item.genre]}">${item.name}</td>
-        <td class="col-remain" id="remain-${index}">${item.stock}</td>
-        ${[0,1,2,3,4].map(c => `<td class="${c%2===0?'bg-guide':''}"><div class="input-cell is-zero" data-row="${index}" data-col="${c}" onclick="openNumpad(this)">0</div></td>`).join('')}
-    `;
-    tableBody.appendChild(tr);
-});
+   
 
 function toggleGenre(genre) {
     // 渡された名前からもスペースを消して検索
@@ -717,5 +707,6 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
